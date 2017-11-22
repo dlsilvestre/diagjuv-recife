@@ -215,6 +215,7 @@ plot_jovemtrab <- ggplot(table_jovemtrab, aes(x =table_jovemtrab$Var1, y = table
   labs(y = "Quantidade de Jovens", x = "", title = "Onde Trabalham os Jovens da RMR?") +
   annotate("text", x = 4, y = 300, label = "Fonte de Dados: Intituto Pelópidas")+
   annotate("text", x = 3, y = 300, label = "Pesquisa Origem-Destino (2016)", size = 3.3) +
+  annotate("text", x = 1, y = 300, label = "ps: VERIFICAR DADO DE RECIFE COMO UM BAIRRO", size = 2.3) +
   coord_flip() +
   tema_massa()
 plot_jovemtrab
@@ -231,17 +232,18 @@ table_jovemest$Var1 <- factor(table_jovemest$Var1, levels = table_jovemest$Var1)
 table_jovemest <- table_jovemest[c(143:162),]
 
 #--- grafico ---#
-plot_jovemtrab <- ggplot(table_jovemest, aes(x =table_jovemest$Var1, y = table_jovemest$Freq))+
+plot_jovemest <- ggplot(table_jovemest, aes(x =table_jovemest$Var1, y = table_jovemest$Freq))+
   geom_bar(stat = "identity", fill = "#15041c") +
-  labs(y = "Quantidade de Jovens", x = "", title = "Onde Trabalham os Jovens da RMR?") +
-  annotate("text", x = 4, y = 300, label = "Fonte de Dados: Intituto Pelópidas")+
-  annotate("text", x = 3, y = 300, label = "Pesquisa Origem-Destino (2016)", size = 3.3) +
+  labs(y = "Quantidade de Jovens", x = "", title = "Onde Estudam os Jovens da RMR?") +
+  annotate("text", x = 4, y = 70, label = "Fonte de Dados: Intituto Pelópidas")+
+  annotate("text", x = 3, y = 70, label = "Pesquisa Origem-Destino (2016)", size = 3.3) +
+  annotate("text", x = 1, y = 70, label = "ps: VERIFICAR DADO DE RECIFE COMO UM BAIRRO", size = 2.3) +
   coord_flip() +
   tema_massa()
-plot_jovemtrab
+plot_jovemest
 
 setwd("C:/Users/Monteiro-DataPC/Documents/GitProjects/diagjuv-recife/Resultados")
-ggsave("bar_trabjovem_bairro.png", plot_jovemtrab, width = 10, height = 7, units = "in")
+ggsave("bar_estjovem_bairro.png", plot_jovemest, width = 10, height = 7, units = "in")
 
 
 
