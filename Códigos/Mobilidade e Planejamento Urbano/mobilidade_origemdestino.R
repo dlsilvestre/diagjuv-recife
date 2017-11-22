@@ -265,24 +265,35 @@ ggplot(data= recife_fort) +
 ufpe_latlon$latcdu <- -8.052600
 ufpe_latlon$longcdu <- -34.95027
 
-# origem-destino ufpe map
-ggplot() + 
+# mudar nome da varivael 
+ufpe_latlon$Intensidade <- ufpe_latlon$prop_bairro 
+
+
+#----- origem-destino ufpe SHAPEMAP -----#
+shp_ufpe_fluxo <- ggplot() + 
   geom_polygon(data= recife_fort, aes(long,lat, group=group),  fill = "white", color = "grey60") +
-  geom_segment(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, yend = latcdu, color= prop_bairro),
+  geom_segment(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, yend = latcdu, color= Intensidade),
                arrow = arrow(length = unit(0.01, "npc"))) +
   scale_color_gradient(low="lightgreen", high= "darkblue")+
- # scale_colour_distiller(palette="Reds", name="Frequency", guide = "colorbar") +
   coord_equal()
+shp_ufpe_fluxo
 
+ggsave("shp_ufpe_fluxo.png", shp_ufpe_fluxo, width = 8, height = 8, units = "in")
 
+#----- Origem Destino ufpe GGMAP -----#
 gg_recife <- get_map("Recife, Brazil",
                      zoom = 12, maptype = 'roadmap')
-#
-ggmap(gg_recife)+
-  geom_curve(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, yend = latcdu, color= prop_bairro),
+
+gg_ufpe_fluxo <- ggmap(gg_recife)+
+  geom_curve(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, yend = latcdu, color= Intensidade),
                curvature = -0.1, size = 0.75) +
   scale_color_gradient(low="lightgreen", high= "darkblue")+
+  ggtitle("Fluxo de Estudantes Residentes em Recife até a UFPE") +
   coord_equal()
+gg_ufpe_fluxo
 
-?scale_color_gradient
-?arrow
+setwd("C:/Users/Monteiro-DataPC/Documents/GitProjects/diagjuv-recife/Resultados")
+ggsave("gg_ufpe_fluxo.png", gg_ufpe_fluxo, width = 8, height = 8, units = "in")
+
+
+
