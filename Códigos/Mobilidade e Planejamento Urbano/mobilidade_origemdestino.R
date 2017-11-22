@@ -13,8 +13,9 @@
 # Qualquer duvida contate o desenvolvedor            #
 # #UseSoftwareLivre                                  #
 #----------------------------------------------------#
+
 # instalar pacotes necessarios
- install.packages(c("readr","plyr", "rgdal", "ggplot2", "ggmap", "maps", "mapdata", "raster"), dependencies = T )
+# install.packages(c("readr","plyr", "rgdal", "ggplot2", "ggmap", "maps", "mapdata", "raster"), dependencies = T )
 
 # carregar pacotes
 library(readr); library(plyr); library(rgdal); library(ggplot2)
@@ -50,8 +51,6 @@ ggmap(gg_recife)+
 
 #----- de onde vem os recifense estudantes da UFPE
 ufpe_dest <- origem_dest[origem_dest$nome_instituicao_ensino == 3,]
-
-levels(as.factor(origem_dest$nome_instituicao_ensino))
 
 ufpe <- c("UNIVERSIDADE FEDERAL ADE PERNAMBUCO", "UNIVERSIDADE FEDERAL D PERNAMBUCO" , 
           "UNIVERSIDADE FEDERAL DE EPERNAMBUCO",                                                                              
@@ -159,9 +158,9 @@ ggsave("bar_ufpe_fora.png", bar_ufpe_fora, width = 12, height = 6, units = "in")
 
 #================================#
 #==== bairros origem da UFPE ====#
+
 library(readxl)
-latlong_bairros_recife <- read_excel("~/Documents/latlong_bairros_recife.xls")
-shp_recife2 <- shapefile(file.choose())
+latlong_recife_bairros <- read_excel("~/Documents/latlong_recife_bairros.xls")
 
 ufpe_bairros <- ufpe_dest[ufpe_dest$cidade_residencia == "RECIFE",]
 ufpe_bairros <- data.frame(table(ufpe_bairros$bairro_residencia))
@@ -184,12 +183,13 @@ best_match= function(string_vector,string_replacement){
   return(string_vector)
 }
 
-latlong_bairros_recife$bairro <- toupper(latlong_bairros_recife$bairro)
-latlong_bairros_recife$bairro = stri_trans_general(latlong_bairros_recife$bairro , "Latin-ASCII")
-ufpe_bairros$bairro = best_match(ufpe_bairros$bairro_n, latlong_bairros_recife$bairro)
+ufpe_bairros$Var1 <- as.character(ufpe_bairros$Var1)
+latlong_recife_bairros$bairro <- toupper(latlong_recife_bairros$bairro)
+latlong_recife_bairros$bairro = stri_trans_general(latlong_recife_bairros$bairro , "Latin-ASCII")
+ufpe_bairros$bairro = best_match(ufpe_bairros$Var1, latlong_recife_bairros$bairro)
 
 # merge data with lat long recife
-ufpe_latlon <- merge(ufpe_bairros, latlong_bairros_recife, by = "bairro")
+ufpe_latlon <- merge(ufpe_bairros, latlong_recife_bairros, by = "bairro")
 ufpe_latlon <- ufpe_latlon[-87,]
 
 # merge data with shapefile@data
@@ -215,7 +215,7 @@ plot_jovemtrab <- ggplot(table_jovemtrab, aes(x =table_jovemtrab$Var1, y = table
   labs(y = "Quantidade de Jovens", x = "", title = "Onde Trabalham os Jovens da RMR?") +
   annotate("text", x = 4, y = 300, label = "Fonte de Dados: Intituto Pelópidas")+
   annotate("text", x = 3, y = 300, label = "Pesquisa Origem-Destino (2016)", size = 3.3) +
-  annotate("text", x = 1, y = 300, label = "ps: VERIFICAR DADO DE RECIFE COMO UM BAIRRO", size = 2.3) +
+  #annotate("text", x = 1, y = 300, label = "ps: VERIFICAR DADO DE RECIFE COMO UM BAIRRO", size = 2.3) +
   coord_flip() +
   tema_massa()
 plot_jovemtrab
@@ -237,7 +237,7 @@ plot_jovemest <- ggplot(table_jovemest, aes(x =table_jovemest$Var1, y = table_jo
   labs(y = "Quantidade de Jovens", x = "", title = "Onde Estudam os Jovens da RMR?") +
   annotate("text", x = 4, y = 70, label = "Fonte de Dados: Intituto Pelópidas")+
   annotate("text", x = 3, y = 70, label = "Pesquisa Origem-Destino (2016)", size = 3.3) +
-  annotate("text", x = 1, y = 70, label = "ps: VERIFICAR DADO DE RECIFE COMO UM BAIRRO", size = 2.3) +
+ # annotate("text", x = 1, y = 70, label = "ps: VERIFICAR DADO DE RECIFE COMO UM BAIRRO", size = 2.3) +
   coord_flip() +
   tema_massa()
 plot_jovemest
@@ -245,14 +245,44 @@ plot_jovemest
 setwd("C:/Users/Monteiro-DataPC/Documents/GitProjects/diagjuv-recife/Resultados")
 ggsave("bar_estjovem_bairro.png", plot_jovemest, width = 10, height = 7, units = "in")
 
+#==== Linhas de Conexao no Mapa ====#
+
+# carregar shapefile
+shp_recife <- shapefile(file.choose())
+
+# tranformar shape em data
+recife_fort <- fortify(shp_recife)
+
+# visualizar shape Recife
+ggplot(data= recife_fort) +
+  geom_polygon(aes(x = recife_fort$long, y = recife_fort$lat, group = group), 
+               fill = "white",
+               color = "grey60")+
+  coord_fixed()+
+  theme_nothing()
+
+# origem-destino ufpe
+ufpe_latlon$latcdu <- -8.052600
+ufpe_latlon$longcdu <- -34.95027
+
+# origem-destino ufpe map
+ggplot() + 
+  geom_polygon(data= recife_fort, aes(long,lat, group=group),  fill = "white", color = "grey60") +
+  geom_segment(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, yend = latcdu, color= prop_bairro),
+               arrow = arrow(length = unit(0.01, "npc"))) +
+  scale_color_gradient(low="lightgreen", high= "darkblue")+
+ # scale_colour_distiller(palette="Reds", name="Frequency", guide = "colorbar") +
+  coord_equal()
 
 
+gg_recife <- get_map("Recife, Brazil",
+                     zoom = 12, maptype = 'roadmap')
+#
+ggmap(gg_recife)+
+  geom_curve(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, yend = latcdu, color= prop_bairro),
+               curvature = -0.1, size = 0.75) +
+  scale_color_gradient(low="lightgreen", high= "darkblue")+
+  coord_equal()
 
-
-
-
-
-
-
-
-
+?scale_color_gradient
+?arrow
