@@ -14,17 +14,25 @@
 # #UseSoftwareLivre                                  #
 #----------------------------------------------------#
 
+# instalar pacotes necessarios
+# install.packages(c("readr","plyr", "rgdal", "ggplot2", "ggmap", "maps", "mapdata", "raster"), dependencies = T )
+
+# carregar pacotes
+library(readr); library(plyr); library(plyr); library(rgdal); library(ggplot2); 
+library(ggmap); library(maps); library(mapdata); library(raster)
+
 #==== pesquisa origem destino ====#
 setwd("~/Documents/Claudio/PCR/")
 shp_recife2 <- shapefile(file.choose())
 
-origem_dest <- read.csv2("~/Documents/Claudio/PCR/pesquisaodrecife2016 (1).csv", stringsAsFactors=FALSE)
+origem_dest <- read_delim("~/Documents/Claudio/untitled folder/diagjuv-recife/Dados Originais/Mobilidade e Planejamento Urbano/pesquisaodrecife2016.csv", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
 
 #---- visual recife
 gg_recife <- get_map(location = c(lon = -34.946964, lat = -8.027562 ),
                      zoom = 11, maptype = 'roadmap')
 ggmap(gg_recife)+
-  geom_polygon(data = shp_recife2,aes(x = long, y = lat, group = group),fill=NA ,color = grey(0.2))+ 
+  geom_polygon(data = shp_recife2, aes(x = long, y = lat, group = group), fill=NA , color = grey(0.2))+ 
   coord_fixed() +
   theme_minimal()
 
