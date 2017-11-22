@@ -18,8 +18,8 @@
 setwd("~/Documents/Claudio/PCR/")
 shp_recife2 <- shapefile(file.choose())
 
-origem_dest <- read.csv2("~/Documents/Claudio/PCR/pesquisaodrecife2016 (1).csv", stringsAsFactors=FALSE)
-
+origem_dest <- read_delim("Dados Originais/Mobilidade e Planejamento Urbano/pesquisaodrecife2016.csv", 
+                                                  ";", escape_double = FALSE, trim_ws = TRUE)
 #---- visual recife
 gg_recife <- get_map(location = c(lon = -34.946964, lat = -8.027562 ),
                      zoom = 11, maptype = 'roadmap')
