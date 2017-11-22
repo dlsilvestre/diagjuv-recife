@@ -13,9 +13,29 @@
 # Qualquer duvida contate o desenvolvedor            #
 # #UseSoftwareLivre                                  #
 #----------------------------------------------------#
+# instalar pacotes necessarios
+ install.packages(c("readr","plyr", "rgdal", "ggplot2", "ggmap", "maps", "mapdata", "raster"), dependencies = T )
 
+# carregar pacotes
+library(readr); library(plyr); library(rgdal); library(ggplot2)
+library(ggmap); library(maps); library(mapdata); library(raster)
+
+# tema ggplot2 para graficos
+ tema_massa <- function (base_size = 12, base_family = "") {
+   theme_minimal(base_size = base_size, base_family = base_family) %+replace% 
+     theme(axis.text.x = element_text(colour= "black",size=11,hjust=.5,vjust=.5,face="plain"),
+           axis.text.y = element_text(colour="black",size=11,angle=0,hjust=1,vjust=0,face="plain"), 
+           axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
+           axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
+           title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"),
+           panel.grid.major = element_line(colour = grey(0.85)), 
+           panel.grid.minor = element_line(colour = grey(1)),
+           legend.key.size = unit(9, "mm"),
+           legend.text = element_text(size = 9, hjust = 3, vjust = 3),
+           legend.title = element_text(size = 9),
+           axis.line = element_line(size = 1, colour = "grey70"))
+ }
 #==== pesquisa origem destino ====#
-setwd("~/Documents/Claudio/PCR/")
 shp_recife2 <- shapefile(file.choose())
 
 origem_dest <- read_delim("Dados Originais/Mobilidade e Planejamento Urbano/pesquisaodrecife2016.csv", 
@@ -27,10 +47,6 @@ ggmap(gg_recife)+
   geom_polygon(data = shp_recife2,aes(x = long, y = lat, group = group),fill=NA ,color = grey(0.2))+ 
   coord_fixed() +
   theme_minimal()
-
-#----- jovens para escola
-jovem_dest <- origem_dest[origem_dest$faixa_etaria == 3,]
-#jov_dest_cdu <- jovem_dest[jovem_dest$]
 
 #----- de onde vem os recifense estudantes da UFPE
 ufpe_dest <- origem_dest[origem_dest$nome_instituicao_ensino == 3,]
@@ -181,11 +197,51 @@ shp_recife3 <- merge(shp_recife2, ufpe_latlon, by = "bairro_n", all = T)
 
 mapa.funcao(shp_recife3, ufpe_bairros2, ufpe_bairros2$Freq)
 
+#===================================#
+#==== DESTINO DOS JOVENS NA RMR ====#
 
+#==== trabalho ====#
+jovem_dest <- origem_dest[origem_dest$faixa_etaria == 3,]
 
+# contar bairro destinos dos jovens TRABALHO
+table_jovemtrab <- data.frame(table(jovem_dest$bairro_trabalho))
+table_jovemtrab <- table_jovemtrab[order(table_jovemtrab$Freq),]
+table_jovemtrab$Var1 <- factor(table_jovemtrab$Var1, levels = table_jovemtrab$Var1)
+table_jovemtrab <- table_jovemtrab[c(143:162),]
 
+#--- grafico ---#
+plot_jovemtrab <- ggplot(table_jovemtrab, aes(x =table_jovemtrab$Var1, y = table_jovemtrab$Freq))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  labs(y = "Quantidade de Jovens", x = "", title = "Onde Trabalham os Jovens da RMR?") +
+  annotate("text", x = 4, y = 300, label = "Fonte de Dados: Intituto Pelópidas")+
+  annotate("text", x = 3, y = 300, label = "Pesquisa Origem-Destino (2016)", size = 3.3) +
+  coord_flip() +
+  tema_massa()
+plot_jovemtrab
 
+setwd("C:/Users/Monteiro-DataPC/Documents/GitProjects/diagjuv-recife/Resultados")
+ggsave("bar_trabjovem_bairro.png", plot_jovemtrab, width = 10, height = 7, units = "in")
 
+#==== estudo ====#
+
+# contar bairro destinos dos jovens TRABALHO
+table_jovemest <- data.frame(table(jovem_dest$bairro_escola))
+table_jovemest <- table_jovemest[order(table_jovemest$Freq),]
+table_jovemest$Var1 <- factor(table_jovemest$Var1, levels = table_jovemest$Var1)
+table_jovemest <- table_jovemest[c(143:162),]
+
+#--- grafico ---#
+plot_jovemtrab <- ggplot(table_jovemest, aes(x =table_jovemest$Var1, y = table_jovemest$Freq))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  labs(y = "Quantidade de Jovens", x = "", title = "Onde Trabalham os Jovens da RMR?") +
+  annotate("text", x = 4, y = 300, label = "Fonte de Dados: Intituto Pelópidas")+
+  annotate("text", x = 3, y = 300, label = "Pesquisa Origem-Destino (2016)", size = 3.3) +
+  coord_flip() +
+  tema_massa()
+plot_jovemtrab
+
+setwd("C:/Users/Monteiro-DataPC/Documents/GitProjects/diagjuv-recife/Resultados")
+ggsave("bar_trabjovem_bairro.png", plot_jovemtrab, width = 10, height = 7, units = "in")
 
 
 
