@@ -13,7 +13,7 @@
 # #UseSoftwareLivre                                  #
 #----------------------------------------------------#
 
-# instalar pacotes necess·rios
+# instalar pacotes necess√°rios
 #install.packages(c("readxl", "xlsx", "ggplot2", "directlabels", "ggrepel", "readr", "plyr", "rgdal", "ggmap", 
 # "maps", "mapdata", "raster", "maptools", "stringi", "DT", "xtable", "gridExtra", "qdap", "ggthemes", "ggpubr", 
 # "dplyr"), dependencies = T)
@@ -122,7 +122,7 @@ ggplot(data = pop_jovem_comp, aes(x = Ano, y = prop_jovem_total, group = Localid
   scale_color_manual(values = c("#325c6c", "#400001", "darkgreen"))+
   geom_text_repel(aes(x = Ano, y = prop_jovem_total, 
                       label = pop_jovem_comp$prop_jovem_total), size = 2.5)+
-  labs(x = "", y = "ProporÁ„o")+
+  labs(x = "", y = "Propor√ß√£o")+
   theme_arretado()
  ggsave("line_comp_prop.png", width = 6, height = 3, units = "in")
 
@@ -136,7 +136,7 @@ ggplot(data = pop_jovem_comp, aes(x = Ano, y = pop_jovem_log, group = Localidade
   scale_color_manual(values = c("#325c6c", "#400001", "darkgreen"))+
   geom_text(aes(x = Ano, y = pop_jovem_log, label = pop_jovem_comp$pop_jovem, 
                 angle = -10 , vjust = -0.5, hjust = 0.4), size = 3,colour="black", fontface = "bold")+
-  labs(x = "", y = "PopulaÁ„o de Jovens")+
+  labs(x = "", y = "Popula√ß√£o de Jovens")+
   theme_arretado()
 ggsave("line_comp_pop.png", width = 9, height = 4, units = "in")
 
@@ -160,17 +160,17 @@ linha_homemprop <- ggplot(comp_jovem_homem, aes(x=Ano, y=prop_jovem, group= Loca
         scale_linetype_manual(values = c(1, 2, 3)) +
         scale_y_continuous(limits= c(0.40, 0.60))+
         scale_color_manual(values = c("#325c6c", "#400001", "darkgreen"))+
-        labs(x = "", y = "ProporÁ„o", title = "Homens")  +
+        labs(x = "", y = "Propor√ß√£o", title = "Homens")  +
         geom_text_repel(aes(x = Ano, y=prop_jovem, label = comp_jovem_homem$prop_jovem), size = 2.3)+
         theme_arretado()
 
-# line plot MULE
+# line plot mulher
 linha_mulherprop <- ggplot(comp_jovem_mulher, aes(x=Ano, y=prop_jovem, group= Localidade, color = Localidade)) +
   geom_line(aes(linetype=Localidade), size=1) +
   scale_linetype_manual(values = c(1, 2, 3)) +
   scale_y_continuous(limits= c(0.40, 0.60))+
   scale_color_manual(values = c("#325c6c", "#400001", "darkgreen"))+
-  labs(x = "ProporÁ„o", y = "ProporÁ„o", title = "Mulheres")  +
+  labs(x = "Propor√ß√£o", y = "Propor√ß√£o", title = "Mulheres")  +
   geom_text_repel(aes(x = Ano, y=prop_jovem, label = comp_jovem_mulher$prop_jovem), size = 2.3)+
   theme_arretado()
 
@@ -212,21 +212,21 @@ mani.pyram <- function(x){
 pyram_databrasil00 <- pyram_data[1:44,-4]
 pyram_databrasil10 <- pyram_data[1:44,-3]
 
-colnames(pyram_databrasil00) <- c("Idade", "Sexo", "PopulaÁ„o")
-colnames(pyram_databrasil10) <- c("Idade", "Sexo", "PopulaÁ„o")
+colnames(pyram_databrasil00) <- c("Idade", "Sexo", "Popula√ß√£o")
+colnames(pyram_databrasil10) <- c("Idade", "Sexo", "Popula√ß√£o")
 
-pyram_databrasil00$PopulaÁ„o <- as.numeric(pyram_databrasil00$PopulaÁ„o)
-pyram_databrasil10$PopulaÁ„o <- as.numeric(pyram_databrasil10$PopulaÁ„o)
+pyram_databrasil00$Popula√ß√£o <- as.numeric(pyram_databrasil00$Popula√ß√£o)
+pyram_databrasil10$Popula√ß√£o <- as.numeric(pyram_databrasil10$Popula√ß√£o)
 
 # 2000
 pyram_databrasil00 <- mani.pyram(pyram_databrasil00)
 
 brasil_py00 <- ggplot(data = pyram_databrasil00, 
                       mapping = aes(x = Idade, fill = Sexo, 
-                                    y = ifelse(test = Sexo == "Homens", yes = -PopulaÁ„o, no = PopulaÁ„o), fill = Sexo)) +
+                                    y = ifelse(test = Sexo == "Homens", yes = -Popula√ß√£o, no = Popula√ß√£o), fill = Sexo)) +
   geom_bar(stat = "identity") +
-  scale_y_continuous(labels = abs, limits = max(pyram_databrasil00$PopulaÁ„o) * c(-1,1)) +
-  labs(y = "PopulaÁ„o", x = "Brasil") +
+  scale_y_continuous(labels = abs, limits = max(pyram_databrasil00$Popula√ß√£o) * c(-1,1)) +
+  labs(y = "Popula√ß√£o", x = "Brasil") +
   theme(axis.text.x = element_text(colour= "black",size=9,hjust=.5,vjust=.5,face="plain"),
         axis.text.y = element_text(colour="black",size=9,angle=0,hjust=1,vjust=0,face="plain"),  
         axis.title.x = element_text(colour="black",size=9,angle=0,hjust=.5,vjust=0,face="plain"),
@@ -239,7 +239,7 @@ brasil_py00 <- ggplot(data = pyram_databrasil00,
         legend.title = element_text(size = 14),
         axis.line = element_line(size = 1, colour = "grey82"))+
   scale_fill_manual(values = c("#1c3c40","lightgreen"))+
-  labs(x = "Brasil", y = "PopulaÁ„o", title = "2000")+
+  labs(x = "Brasil", y = "Popula√ß√£o", title = "2000")+
   coord_flip()
 
 brasil_py00
@@ -248,10 +248,10 @@ pyram_databrasil10 <- mani.pyram(pyram_databrasil10)
 
 brasil_py10 <- ggplot(data = pyram_databrasil10, 
                       mapping = aes(x = Idade, fill = Sexo, 
-                                    y = ifelse(test = Sexo == "Homens", yes = -PopulaÁ„o, no = PopulaÁ„o))) +
+                                    y = ifelse(test = Sexo == "Homens", yes = -Popula√ß√£o, no = Popula√ß√£o))) +
   geom_bar(stat = "identity") +
-  scale_y_continuous(labels = abs, limits = max(pyram_databrasil10$PopulaÁ„o) * c(-1,1)) +
-  labs(y = "PopulaÁ„o", x = "") +
+  scale_y_continuous(labels = abs, limits = max(pyram_databrasil10$Popula√ß√£o) * c(-1,1)) +
+  labs(y = "Popula√ß√£o", x = "") +
   theme(axis.text.x = element_text(colour= "black",size=9,hjust=.5,vjust=.5,face="plain"),
         axis.text.y = element_text(colour="black",size=9,angle=0,hjust=1,vjust=0,face="plain"),  
         axis.title.x = element_text(colour="black",size=9,angle=0,hjust=.5,vjust=0,face="plain"),
@@ -263,7 +263,7 @@ brasil_py10 <- ggplot(data = pyram_databrasil10,
         legend.title = element_text(size = 14),
         axis.line = element_line(size = 1, colour = "grey82"))+
   scale_fill_manual(values = c("#1c3c40","lightgreen"))+
-  labs(x = "", y = "PopulaÁ„o", title = "2010")+
+  labs(x = "", y = "Popula√ß√£o", title = "2010")+
   coord_flip()
 
 brasil_py10
@@ -272,21 +272,21 @@ brasil_py10
 pyram_dataPE00 <- pyram_data[47:88,-4]
 pyram_dataPE10 <- pyram_data[47:88,-3]
 
-colnames(pyram_dataPE00) <- c("Idade", "Sexo", "PopulaÁ„o")
-colnames(pyram_dataPE10) <- c("Idade", "Sexo", "PopulaÁ„o")
+colnames(pyram_dataPE00) <- c("Idade", "Sexo", "Popula√ß√£o")
+colnames(pyram_dataPE10) <- c("Idade", "Sexo", "Popula√ß√£o")
 
-pyram_dataPE00$PopulaÁ„o <- as.numeric(pyram_dataPE00$PopulaÁ„o)
-pyram_dataPE10$PopulaÁ„o <- as.numeric(pyram_dataPE10$PopulaÁ„o)
+pyram_dataPE00$Popula√ß√£o <- as.numeric(pyram_dataPE00$Popula√ß√£o)
+pyram_dataPE10$Popula√ß√£o <- as.numeric(pyram_dataPE10$Popula√ß√£o)
 
 # 2000
 pyram_dataPE00 <- mani.pyram(pyram_dataPE00)
 
 PE_py00 <- ggplot(data = pyram_dataPE00, 
                   mapping = aes(x = Idade, fill = Sexo, 
-                                y = ifelse(test = Sexo == "Homens", yes = -PopulaÁ„o, no = PopulaÁ„o))) +
+                                y = ifelse(test = Sexo == "Homens", yes = -Popula√ß√£o, no = Popula√ß√£o))) +
   geom_bar(stat = "identity") +
-  scale_y_continuous(labels = abs, limits = max(pyram_dataPE00$PopulaÁ„o) * c(-1,1)) +
-  labs(y = "PopulaÁ„o", x = "Pernambuco") +
+  scale_y_continuous(labels = abs, limits = max(pyram_dataPE00$Popula√ß√£o) * c(-1,1)) +
+  labs(y = "Popula√ß√£o", x = "Pernambuco") +
   theme(axis.text.x = element_text(colour= "black",size=9,hjust=.5,vjust=.5,face="plain"),
         axis.text.y = element_text(colour="black",size=9,angle=0,hjust=1,vjust=0,face="plain"),  
         axis.title.x = element_text(colour="black",size=9,angle=0,hjust=.5,vjust=.5,face="plain"),
@@ -298,7 +298,7 @@ PE_py00 <- ggplot(data = pyram_dataPE00,
         legend.title = element_text(size = 14),
         axis.line = element_line(size = 1, colour = "grey82"))+
   scale_fill_manual(values = c("#1c3c40","lightgreen"))+
-  labs(x = "Pernambuco", y = "PopulaÁ„o")+
+  labs(x = "Pernambuco", y = "Popula√ß√£o")+
   coord_flip()
 
 PE_py00
@@ -307,10 +307,10 @@ pyram_dataPE10 <- mani.pyram(pyram_dataPE10)
 
 PE_py10 <- ggplot(data = pyram_dataPE10, 
                   mapping = aes(x = Idade, fill = Sexo, 
-                                y = ifelse(test = Sexo == "Homens", yes = -PopulaÁ„o, no = PopulaÁ„o))) +
+                                y = ifelse(test = Sexo == "Homens", yes = -Popula√ß√£o, no = Popula√ß√£o))) +
   geom_bar(stat = "identity") +
-  scale_y_continuous(labels = abs, limits = max(pyram_dataPE10$PopulaÁ„o) * c(-1,1)) +
-  labs(y = "PopulaÁ„o", x = "") +
+  scale_y_continuous(labels = abs, limits = max(pyram_dataPE10$Popula√ß√£o) * c(-1,1)) +
+  labs(y = "Popula√ß√£o", x = "") +
   theme(axis.text.x = element_text(colour= "black",size=9,hjust=.5,vjust=.5,face="plain"),
         axis.text.y = element_text(colour="black",size=9,angle=0,hjust=1,vjust=0,face="plain"),  
         axis.title.x = element_text(colour="black",size=9,angle=0,hjust=.5,vjust=0,face="plain"),
@@ -321,7 +321,7 @@ PE_py10 <- ggplot(data = pyram_dataPE10,
         legend.title = element_text(size = 14),
         axis.line = element_line(size = 1, colour = "grey82"))+
   scale_fill_manual(values = c("#1c3c40","lightgreen"))+
-  labs(x = "", y = "PopulaÁ„o")+
+  labs(x = "", y = "Popula√ß√£o")+
   coord_flip()
 
 PE_py10
@@ -330,21 +330,21 @@ PE_py10
 pyram_dataRec00 <- pyram_data[91:132,-4]
 pyram_dataRec10 <- pyram_data[91:132,-3]
 
-colnames(pyram_dataRec00) <- c("Idade", "Sexo", "PopulaÁ„o")
-colnames(pyram_dataRec10) <- c("Idade", "Sexo", "PopulaÁ„o")
+colnames(pyram_dataRec00) <- c("Idade", "Sexo", "Popula√ß√£o")
+colnames(pyram_dataRec10) <- c("Idade", "Sexo", "Popula√ß√£o")
 
-pyram_dataRec00$PopulaÁ„o <- as.numeric(pyram_dataRec00$PopulaÁ„o)
-pyram_dataRec10$PopulaÁ„o <- as.numeric(pyram_dataRec10$PopulaÁ„o)
+pyram_dataRec00$Popula√ß√£o <- as.numeric(pyram_dataRec00$Popula√ß√£o)
+pyram_dataRec10$Popula√ß√£o <- as.numeric(pyram_dataRec10$Popula√ß√£o)
 
 # 2000
 pyram_dataRec00 <- mani.pyram(pyram_dataRec00)
 
 Rec_py00 <- ggplot(data = pyram_dataRec00, 
                    mapping = aes(x = Idade, fill = Sexo, 
-                                 y = ifelse(test = Sexo == "Homens", yes = -PopulaÁ„o, no = PopulaÁ„o))) +
+                                 y = ifelse(test = Sexo == "Homens", yes = -Popula√ß√£o, no = Popula√ß√£o))) +
   geom_bar(stat = "identity") +
-  scale_y_continuous(labels = abs, limits = max(pyram_dataRec00$PopulaÁ„o) * c(-1,1)) +
-  labs(y = "PopulaÁ„o", x = "Recife") +
+  scale_y_continuous(labels = abs, limits = max(pyram_dataRec00$Popula√ß√£o) * c(-1,1)) +
+  labs(y = "Popula√ß√£o", x = "Recife") +
   theme(axis.text.x = element_text(colour= "black",size=9,hjust=.5,vjust=.5,face="plain"),
         axis.text.y = element_text(colour="black",size=9,angle=0,hjust=1,vjust=0,face="plain"),  
         axis.title.x = element_text(colour="black",size=9,angle=0,hjust=.5,vjust=0,face="plain"),
@@ -356,7 +356,7 @@ Rec_py00 <- ggplot(data = pyram_dataRec00,
         legend.title = element_text(size = 14),
         axis.line = element_line(size = 1, colour = "grey82"))+
   scale_fill_manual(values = c("#1c3c40","lightgreen"))+
-  labs(x = "Recife", y = "PopulaÁ„o")+
+  labs(x = "Recife", y = "Popula√ß√£o")+
   coord_flip()
 Rec_py00
 
@@ -366,10 +366,10 @@ pyram_dataRec10 <- mani.pyram(pyram_dataRec10)
 
 Rec_py10 <- ggplot(data = pyram_dataRec10, 
                    mapping = aes(x = Idade, fill = Sexo, 
-                                 y = ifelse(test = Sexo == "Homens", yes = -PopulaÁ„o, no = PopulaÁ„o))) +
+                                 y = ifelse(test = Sexo == "Homens", yes = -Popula√ß√£o, no = Popula√ß√£o))) +
   geom_bar(stat = "identity") +
-  scale_y_continuous(labels = abs, limits = max(pyram_dataRec10$PopulaÁ„o) * c(-1,1)) +
-  labs(y = "PopulaÁ„o", x = "") +
+  scale_y_continuous(labels = abs, limits = max(pyram_dataRec10$Popula√ß√£o) * c(-1,1)) +
+  labs(y = "Popula√ß√£o", x = "") +
   theme(axis.text.x = element_text(colour= "black",size=9,hjust=.5,vjust=.5,face="plain"),
         axis.text.y = element_text(colour="black",size=9,angle=0,hjust=1,vjust=0,face="plain"),  
         axis.title.y = element_text(colour="black",size=9,angle=90,hjust=.5,vjust=0.5,face="plain"),
@@ -381,7 +381,7 @@ Rec_py10 <- ggplot(data = pyram_dataRec10,
         legend.title = element_text(size = 14),
         axis.line = element_line(size = 1, colour = "grey82"))+
   scale_fill_manual(values = c("#1c3c40","lightgreen"))+
-  labs(x = "", y = "PopulaÁ„o")+
+  labs(x = "", y = "Popula√ß√£o")+
   coord_flip()
 Rec_py10
 
