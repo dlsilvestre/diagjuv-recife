@@ -268,21 +268,19 @@ ufpe_latlon$longcdu <- -34.95027
 # mudar nome da varivael 
 ufpe_latlon$Intensidade <- ufpe_latlon$prop_bairro 
 
-
 #----- origem-destino ufpe SHAPEMAP -----#
 shp_ufpe_fluxo <- ggplot() + 
   geom_polygon(data= recife_fort, aes(long,lat, group=group),  fill = "white", color = "grey60") +
-  geom_segment(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, yend = latcdu, color= Intensidade),
-               arrow = arrow(length = unit(0.01, "npc"))) +
+  geom_segment(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, yend = latcdu, color= Intensidade)) +
   scale_color_gradient(low="lightgreen", high= "darkblue")+
-  coord_equal()
+  coord_equal()+
+  theme_nothing()
 shp_ufpe_fluxo
 
 ggsave("shp_ufpe_fluxo.png", shp_ufpe_fluxo, width = 8, height = 8, units = "in")
 
 #----- Origem Destino ufpe GGMAP -----#
-gg_recife <- get_map("Recife, Brazil",
-                     zoom = 12, maptype = 'roadmap')
+gg_recife <- get_map(location = c(lon= -34.915573, lat =  -8.046748), zoom = 12, maptype = 'roadmap')
 
 gg_ufpe_fluxo <- ggmap(gg_recife)+
   geom_curve(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, yend = latcdu, color= Intensidade),
@@ -294,6 +292,33 @@ gg_ufpe_fluxo
 
 setwd("C:/Users/Monteiro-DataPC/Documents/GitProjects/diagjuv-recife/Resultados")
 ggsave("gg_ufpe_fluxo.png", gg_ufpe_fluxo, width = 8, height = 8, units = "in")
+
+#---- GG SHAPE ----#
+
+ggshape_ufpe_fluxo <- ggmap(gg_recife)+
+              geom_curve(data = ufpe_latlon, aes(x = long, y = lat, xend = longcdu, 
+                                                 yend = latcdu, color= Intensidade),
+                                                    curvature = -0.1, size = 0.75) +
+              scale_color_gradient(low="lightgreen", high= "darkblue")+
+  geom_polygon(aes(x = long, y = lat, group = group), 
+               data = recife_fort,
+               color = "black",
+               size = 0.25)+
+ggshape_ufpe_fluxo
+
+#=================================#
+# como os jovens vao trabalhar?
+
+table(jovem_dest$meio_transporte_trab)
+
+
+
+
+
+
+
+
+
 
 
 
