@@ -62,7 +62,11 @@ pop_idaderaca_parda$localidade <- pop_idaderaca_preta$localidade <- pop_idaderac
 pop_idaderaca_total$localidade 
 
 # combinar
+<<<<<<< HEAD
 pop_idaderaca_2010 <- rbind(pop_idaderaca_amarela, 
+=======
+pop_idaderaca_20102 <- rbind(pop_idaderaca_amarela, 
+>>>>>>> 4081be3e44ccc8a07b60ad1ddf71a973a79bf1ff
                             pop_idaderaca_branca,
                             pop_idaderaca_indigena,  
                             pop_idaderaca_parda,
@@ -70,6 +74,7 @@ pop_idaderaca_2010 <- rbind(pop_idaderaca_amarela,
                             pop_idaderaca_semdecla, 
                             pop_idaderaca_total)
 
+<<<<<<< HEAD
 # limpar nomes dos bairros ######### EM CONTRUCAO ########
 
 pop_idaderaca_2010$localidade <- as.character(pop_idaderaca_2010$localidade)
@@ -90,6 +95,17 @@ gsub()
 
 
 library(stringr)
+=======
+
+
+
+
+
+
+
+
+
+>>>>>>> 4081be3e44ccc8a07b60ad1ddf71a973a79bf1ff
 
 
 
