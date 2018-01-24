@@ -22,26 +22,10 @@
 # "dplyr"), dependencies = T)
 
 # carregar pacotes
-library(ggthemes)
-library(qdap)
-library(readxl)
-library(xlsx)
-library(ggplot2)
-library(directlabels)
-library(ggrepel)
-library(readr)
-library(plyr)
-library(rgdal)
-library(ggmap)
-library(maps)
-library(mapdata)
-library(raster)
-library(maptools)
-library(stringi)
-library(DT)
-library(xtable)
-library(ggpubr)
-library(dplyr)
+library(ggthemes); library(qdap); library(readxl); library(xlsx); library(ggplot2); library(directlabels)
+library(ggrepel); library(readr); library(plyr); library(rgdal); library(ggmap); library(maps)
+library(mapdata); library(raster); library(maptools); library(stringi); library(DT)
+library(xtable); library(ggpubr); library(dplyr)
 
 #---------------------------------#
 #  MANIPULACAO DOS DADOS
