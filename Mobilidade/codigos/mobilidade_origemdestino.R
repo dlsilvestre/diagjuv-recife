@@ -14,6 +14,11 @@
 # #UseSoftwareLivre                                  #
 #----------------------------------------------------#
 
+
+#============================================#
+# CARREGAR INFORMACOES DE BASE
+#============================================#
+
 # instalar pacotes necessarios
 # install.packages(c("readr","plyr", "rgdal", "ggplot2", "ggmap", "maps", "mapdata", "raster"), dependencies = T )
 
@@ -36,18 +41,27 @@ library(ggmap); library(maps); library(mapdata); library(raster)
            legend.title = element_text(size = 9),
            axis.line = element_line(size = 1, colour = "grey70"))
  }
-#==== pesquisa origem destino ====#
-shp_recife2 <- shapefile(file.choose())
+ 
+# carregar shapefile 1 (completo)
+ shp_recife1 <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
+ 
+ 
+ # carregar shapefile 2 (coord google, sem cabanga)
+ shp_recife2 <- shapefile("")
 
-origem_dest <- read_delim("~/Documents/Claudio/untitled folder/diagjuv-recife/Dados Originais/Mobilidade e Planejamento Urbano/pesquisaodrecife2016.csv", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
+# carregar base de dados
+origem_dest <- read_delim("Mobilidade/daods/pesquisaodrecife2016.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 
-origem_dest <- read_delim("Dados Originais/Mobilidade e Planejamento Urbano/pesquisaodrecife2016.csv", 
-                                                  ";", escape_double = FALSE, trim_ws = TRUE)
+# baixar base cartografica do google
+gg_recife <- get_map(location = c(lon = -34.946964, lat = -8.027562 ),  zoom = 11, maptype = 'roadmap')
 
-gg_recife <- get_map(location = c(lon = -34.946964, lat = -8.027562 ),
-                     zoom = 11, maptype = 'roadmap')
-ggmap(gg_recife)+
+
+#==========================================#
+# PROCESSAMENTO E VISUALIZACAO DE DADOS
+#==========================================#
+
+# Plot ggmap
+ggmap(gg_recife)+ 
   geom_polygon(data = shp_recife2, aes(x = long, y = lat, group = group), fill=NA , color = grey(0.2))+ 
   coord_fixed() +
   theme_minimal()
@@ -313,6 +327,112 @@ ggshape_ufpe_fluxo
 # como os jovens vao trabalhar?
 
 table(jovem_dest$meio_transporte_trab)
+
+
+#========================================#
+# como se movimentam os jovens do Recife?
+#========================================#
+
+#------------------#
+#---- TRABALHO ----#
+
+# selecionar jovens trabalhadores do Recife
+od_recife_jovem <- origem_dest[origem_dest$cidade_residencia == "RECIFE" & 
+                               origem_dest$faixa_etaria == 3 &
+                               origem_dest$trabalha == 1,]
+
+# contar uso do meio de transporte p/ trabalhar
+meio_transporte_trab <- c(length(grep("0", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("1", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("2", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("3", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("4", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("5", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("6", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("7", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("8", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("9", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("10", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("11", od_recife_jovem$meio_transporte_trab)),
+                          length(grep("12", od_recife_jovem$meio_transporte_trab))
+                          )
+
+# meios de tranporte
+transporte <- c("Não declarado", 
+                "A pé", 
+                "Bicicleta", 
+                "Ônibus", 
+                "Metrô", 
+                "Carro (dirigindo)", 
+                "Carro (como carona de familiar)", 
+                "Carro (como carona de amigo/colega)", 
+                "Carro (com motorista)", 
+                "Motocicleta", 
+                "Transporte escolar", 
+                "Táxi", 
+                "Fretado")
+
+# mergir dados
+data_meiotransp <- data.frame(meio_transporte_trab, transporte)
+
+# criar prop
+data_meiotransp$prop_transp <- data_meiotransp$meio_transporte_trab / sum(data_meiotransp$meio_transporte_trab)
+data_meiotransp$prop_transp <- round(data_meiotransp$prop_transp, 3)*100
+
+# ordenar para plotagem
+data_meiotransp <- data_meiotransp[order(data_meiotransp$prop_transp),]
+data_meiotransp$prop_transp <- factor(data_meiotransp$prop_transp, levels = data_meiotransp$prop_transp)
+
+# 
+ggplot(data_meiotransp, aes(x = transporte, y = prop_transp))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  labs(y = "Porcentagem do Total de Jovens Trabalhadores", x = "", title = "Meio de Tranporte dos Jovens p/ Trabalho") +
+  coord_flip()
+
+ggsave("transporte_trabalho.png", path = "Mobilidade/resultados", width = 8.5, height = 5, units = "in")
+
+#----------------#
+#---- ESTUDO ----#
+
+# selecionar jovens estudantes do Recife
+od_recife_jovem2 <- origem_dest[origem_dest$cidade_residencia == "RECIFE" & 
+                                 origem_dest$faixa_etaria == 3 &
+                                 origem_dest$pesquisado_estuda == 1,]
+
+# contar uso do meio de transporte p/ trabalhar
+meio_transporte_est<- c(length(grep("0", od_recife_jovem2$transporte_aula)),
+                          length(grep("1", od_recife_jovem2$transporte_aula)),
+                          length(grep("2", od_recife_jovem2$transporte_aula)),
+                          length(grep("3", od_recife_jovem2$transporte_aula)),
+                          length(grep("4", od_recife_jovem2$transporte_aula)),
+                          length(grep("5", od_recife_jovem2$transporte_aula)),
+                          length(grep("6", od_recife_jovem2$transporte_aula)),
+                          length(grep("7", od_recife_jovem2$transporte_aula)),
+                          length(grep("8", od_recife_jovem2$transporte_aula)),
+                          length(grep("9", od_recife_jovem2$transporte_aula)),
+                          length(grep("10", od_recife_jovem2$transporte_aula)),
+                          length(grep("11", od_recife_jovem2$transporte_aula)),
+                          length(grep("12", od_recife_jovem2$transporte_aula))
+)
+
+# mergir dados
+data2_meiotransp <- data.frame(meio_transporte_est, transporte)
+
+# criar prop
+data2_meiotransp$prop_transp2 <- data2_meiotransp$meio_transporte_est / sum(data2_meiotransp$meio_transporte_est)
+data2_meiotransp$prop_transp2 <- round(data2_meiotransp$prop_transp2, 3)*100
+
+# ordenar para plotagem
+data2_meiotransp <- data2_meiotransp[order(data2_meiotransp$prop_transp2),]
+data2_meiotransp$prop_transp2 <- factor(data2_meiotransp$prop_transp2, levels = data2_meiotransp$prop_transp2)
+
+# 
+ggplot(data2_meiotransp, aes(x = transporte, y = prop_transp2))+
+  geom_bar(stat = "identity", fill = "#15041c") +
+  labs(y = "Porcentagem do Total de Jovens Estudantes", x = "", title = "Deslocamento de Jovens Estudantes") +
+  coord_flip()
+
+ggsave("transporte_estudo.png", path = "Mobilidade/resultados", width = 8.5, height = 5, units = "in")
 
 
 
