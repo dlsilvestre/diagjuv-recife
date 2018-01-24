@@ -50,7 +50,7 @@ library(ggmap); library(maps); library(mapdata); library(raster)
  shp_recife2 <- shapefile("")
 
 # carregar base de dados
-origem_dest <- read_delim("Mobilidade/daods/pesquisaodrecife2016.csv", ";", escape_double = FALSE, trim_ws = TRUE)
+origem_dest <- read_delim("Mobilidade/dados/pesquisaodrecife2016.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 
 # baixar base cartografica do google
 gg_recife <- get_map(location = c(lon = -34.946964, lat = -8.027562 ),  zoom = 11, maptype = 'roadmap')
