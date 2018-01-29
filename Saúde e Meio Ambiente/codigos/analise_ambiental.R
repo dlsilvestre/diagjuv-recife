@@ -17,7 +17,6 @@
 # instalar pacotes necessarios
 # install.packages(c("devtools", "readxl"))
 
-<<<<<<< HEAD
 library(readxl); library(devtools); library(dplyr);  library(ggrepel); 
 library(purrr); library(ggplot2);library(stringi); library(rgdal); library(ggplot2); 
 library(maps); library(mapdata); library(raster); library(ggmap)
@@ -88,9 +87,7 @@ mapa.funcao <- function(shape, data, variable, title) {
   return(plot)
 }
 
-=======
 library(readxl); library(devtools)
->>>>>>> ceaccd3f044760adf759cdf5fdbc22616b40ca68
 
 #=================================#
 #           MORTALIDADE    
@@ -121,7 +118,6 @@ esgoto2000 <- esgoto2000[712:805,]
 esgoto2010 <- esgoto2010[1018:1111,]
 
 # recodificar variaveis
-<<<<<<< HEAD
 colnames(esgoto2000) 
 colnames(esgoto2010) <- c("localidade", "total_domicilios", "possui_banheiro_total", "esgotamento_geral_pluvial", 
                           "esgotamento_fossa_septica", "esgotamento_outro", "nao_possui_banheiro", "codigo")
@@ -139,17 +135,6 @@ ggsave("esgotamento_absoluto.png", path = "Saúde e Meio Ambiente/resultados", ac
 # mapa prop. esgotamento
 mapa.funcao(shp_recife1, esgoto2010, esgoto2010$taxa_esgotamento, "Taxa de Domicilios com Esgotamento Sanitário")
 ggsave("esgotamento_taxa.png", path = "Saúde e Meio Ambiente/resultados", acid2, width = 15, height = 9, units = "in")
-=======
-
-
-
-
-
-
-
-
-
->>>>>>> ceaccd3f044760adf759cdf5fdbc22616b40ca68
 
 
 
