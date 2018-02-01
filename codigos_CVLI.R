@@ -72,11 +72,17 @@ colnames(x1)[2] <- c("Mortes")
 colnames(x2)[2] <- c("Mortes")
 colnames(x3)[2] <- c("Mortes")
 
-cvli_data2 <- rbind(x1, x2, x3)
+cvli_data2 <- rbind(x1, x2)
 
 # gráfico
 ggplot(data = cvli_data2) +
-  geom_line(aes(x = Ano, y = Mortes, group = grupo, color = grupo))
+  geom_line(aes(x = Ano, y = Mortes, group = grupo, color = grupo), size = 1) + 
+  scale_color_manual(values=c("#7f0000", "#E69F00"))+
+  scale_y_continuous(limits = c(0,800))+
+  theme(legend.position="bottom")
+
+# salvar grafico
+ggsave("mortes_total_jovens_porano.png", path = "Violência/resultados", width = 10, height = 5, units = "in")
 
 
 # POR MES
@@ -84,6 +90,9 @@ ggplot(data = cvli_data2) +
 #mes <- mes[order(mes$Var1),]
 
 
+#=========================================#
+# CVLI por bairro - total/jovem/total-jovem
+#=========================================#
 
 
 
@@ -95,8 +104,7 @@ ggplot(data = cvli_data2) +
 
 
 
-
-
+getwd()
 
 
 
