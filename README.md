@@ -1,2 +1,15 @@
-# diagjuv-recife
-Este é um projeto de tratamento e análise de dados relativos à condição juvenil na cidade do Recife, elaborado por meio de consultoria prestada à Prefeitura da Cidade do Recife - Secretaria Executiva de Juventude 
+# Diagnóstico da Condição Juvenil no Recife (diagjuv-recife)
+Este é um projeto de coleta, manipulação e análise de dados para produção do Diagnóstico da Condição Juvenil na Cidade do Recife, em desenvolvimento por meio de serviço prestado à Prefeitura da Cidade do Recife - Secretaria Executiva de Juventude.
+
+## Objetivo
+Produzir Diagnóstico Sobre Tendências e Desafios para a Vivência da Condição Juvenil em Recife, a partir da seleção e análise de informações disponíveis em bases de dados pré-existentes, levando em consideração diferentes recortes temporais e informações como taxas de ocupação, emprego, desemprego, rendimento, escolarização e qualificação profissional, mas também apontando diferenças entre as regiões da cidade que permitam refletir sobre como as desigualdades sociais e urbanas impactam na vida das pessoas jovens.
+
+## Atividades
+1. Oficina de Nivelamento sobre o escopo e a metodologia da investigação – a ser realizada em três etapas: uma reunião do Comitê Intersetorial de Juventude, para discutir a iniciativa com parceiros de outros órgãos municipais; discussão com conselheiros de juventude interessados pelo tema, em reunião extraordinária, aberta ao público; e discussão com estudiosos locais de temas relativos à juventude.
+2. Levantamento de Dados - Os dados para este Diagnóstico serão selecionados e analisados a partir de informações disponíveis em bases de dados pré-existentes sobre a população-alvo, presentes nas plataformas: SIDRA IBGE (ex: Censo Demográfico, PNAD, etc); Dados Abertos Recife (ex: Pesquisa Origem Destino, Número de Acidentes de Trânsito, Censo Escolar; etc) e outras que vierem a ser identificadas. O Diagnóstico resultará em uma apresentação sintética dos resultados da investigação, incluindo tabelas, gráficos e textos analíticos que sistematizem variáveis como empregabilidade, gênero, raça, renda, educação, família, moradia, mobilidade urbana, etc.
+3. Produzir versão preliminar de Diagnóstico da Condição Juvenil no Recife, conforme eixos e indicadores definidos na atividade 1. 
+4. Realizar evento de apresentação e discussão de resultados da investigação em Recife, com o objetivo de contribuir para o avanço de articulações estratégicas para a garantia dos direitos da juventude que assegurem a melhoria da condição juvenil na cidade. 
+5. Produzir versão final do Diagnóstico da Condição Juvenil no Recife, conforme eixos e indicadores definidos na referida Oficina de Nivelamento e incluindo eventuais contribuições decorrentes do evento de apresentação e discussão dos resultados.
+
+## Produto Específico Final
+Relatório Diagnóstico da Condição Juvenil no Recife, contendo (i) resumo do estado da arte e conhecimento acumulado sobre a noção de “condição juvenil”; (ii) cronograma e descrição de etapas da investigação: bases de dados utilizadas, procedimentos metodológicos, formas de apresentação dos dados e resumo das análises empreendidas sobre cada conjunto de variáveis; (iii) resultados analíticos do trabalho, conforme eixos e indicadores definidos na referida Oficina de Nivelamento e incluindo eventuais contribuições decorrentes do evento de apresentação e discussão dos resultados desta investigação. 
