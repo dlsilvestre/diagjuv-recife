@@ -17,7 +17,7 @@
 
 
 # instalar pacotes
-install.packages(c("readxl", "stringr", "dplyr", "ggplot2"))
+# install.packages(c("readxl", "stringr", "dplyr", "ggplot2"))
 
 # carregar pacotes
 library(readxl); library(stringr); library(dplyr); library(ggplot2)
@@ -44,9 +44,25 @@ data_cvli <-  data_cvli[-1,]
 colnames(data_cvli) <- str_replace(names, "NA", "DATA")
 
 
-#=========================================#
-# CVLI por ano - total/jovem/total-jovem
-#=========================================#
+#=========================#
+# CVLI por faixa etaria 
+#=========================#
+
+ggplot(data = data_cvli)+
+  geom_bar(aes(x = data_cvli$IDADE), fill = "#333333")+
+  geom_vline(xintercept = 15, size = 1, colour = "#FF3721",linetype = "dashed")+
+  geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
+  labs(x = "Idade", y = "Frequênica de CVLI")+
+  tema_massa()
+  
+
+# salvar grafico
+ggsave("mortes_por_idade.png", path = "Violência/resultados",
+       width = 8, height = 5, units = "in")
+
+#=======================#
+# CVLI por ano 
+#=======================#
 
 #total
 ano_data_cvli <- data.frame(table(data_cvli$ANO))
@@ -66,13 +82,13 @@ cvli_data1 <- mutate(cvli_data1, mortesTotais_jovens = mortesTotais - mortesJove
 #---- manipular e mergir bases ----#
 x1 <- data.frame(cvli_data1[,c(1:2)], grupo = "Mortes Totais")
 x2 <- data.frame(cvli_data1[,c(1,3)], grupo = "Mortes de Jovens")
-x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "Mortes Totais - Jovens")
+x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "Mortes de Não-jovens")
 
 colnames(x1)[2] <- c("Mortes")
 colnames(x2)[2] <- c("Mortes")
 colnames(x3)[2] <- c("Mortes")
 
-cvli_data2 <- rbind(x1, x2)
+cvli_data2 <- rbind(x2, x3)
 
 # gráfico
 ggplot(data = cvli_data2) +
