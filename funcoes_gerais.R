@@ -31,3 +31,67 @@ tema_massa <- function (base_size = 12, base_family = "") {
           legend.title = element_text(size = 9),
           axis.line = element_line(size = 1, colour = "grey70"))
 }
+
+
+data <- jovem_morte_bairro
+variable <- jovem_morte_bairro$Freq
+shape <- shp_recife1
+
+mapa.funcao <- function(shape, data, variable, title) { 
+  # function to create merge string based on similarity
+  best_match= function(string_vector,string_replacement){
+    s<-string_replacement %>% 
+      purrr::map_int(~{
+        .x %>% 
+          RecordLinkage::levenshteinSim(string_vector) %>%
+          match(max(.),.)
+      })
+    string_vector[s] = string_replacement
+    return(string_vector)
+  }
+  
+  data$EBAIRRNOME = data$localidade
+  data$EBAIRRNOME = toupper(data$EBAIRRNOME)
+  data$EBAIRRNOME = stri_trans_general(data$EBAIRRNOME , "Latin-ASCII")
+  data$EBAIRRNOME = best_match(data$EBAIRRNOME, shape$EBAIRRNOME)
+  data$variavel <- variable
+  
+  # merge data with shapefile
+  shp_data <- merge(shape, data, by = "EBAIRRNOME", all = T)
+  
+  # definir labels no mapa
+  shp_data$variavel[is.na(shp_data$variavel)] <- 0
+  shp_data <- shp_data[order(shp_data$variavel),]
+  shp_data$bairros_detasq <- 1
+  shp_data$bairros_detasq[1:3] <- ""
+  shp_data$bairros_detasq[c(length(shp_data)-3):c(length(shp_data))] <- ""
+  
+  shp_data$bairros_detasq <- with(shp_data, paste0(shp_data$bairros_detasq, shp_data$EBAIRRNOME))
+  shp_data$bairros_detasq_cod <- grepl(shp_data$bairros_detasq, pattern = "1")
+  shp_data$bairros_detasq[shp_data$bairros_detasq_cod == TRUE ] <- ""
+  
+  # tranformar shapefile em polygonsdataframe
+  data_fortity <- fortify(shp_data, region = "localidade")
+  localidade <- shp_data@data$localidade
+  
+  # extrair centroides dos poligonos
+  centroids.df <- as.data.frame(coordinates(shp_data))
+  names(centroids.df) <- c("Longitude", "Latitude")  #more sensible column localidades
+  
+  # This shapefile contained population data, let's plot it.
+  variavel <- shp_data@data$variavel
+  nomes_centroides <- shp_data$bairros_detasq
+  map_dataframe <- data.frame(localidade, variavel, centroids.df, nomes_centroides)
+  
+  plot <- ggplot(data = map_dataframe, aes(map_id = localidade)) + 
+    geom_map(aes(fill = shp_data$variavel), colour = grey(0.85),  map = data_fortity) +
+    expand_limits(x = data_fortity$long, y = data_fortity$lat) +
+    scale_fill_viridis(option="D") +
+    geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude),
+                     size = 3, color = "black") + #add labels at centroids
+  coord_fixed(1) +
+  #  labs(title = title)+
+    theme_nothing(legend = T)
+  plot
+  return(plot)
+}

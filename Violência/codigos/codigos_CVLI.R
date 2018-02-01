@@ -20,7 +20,7 @@
 # install.packages(c("readxl", "stringr", "dplyr", "ggplot2"))
 
 # carregar pacotes
-library(readxl); library(stringr); library(dplyr); library(ggplot2)
+library(readxl); library(stringr); library(dplyr); library(ggplot2); library(viridis)
 
 # carregar banco CVLI 2013-2017
 data_cvli <-  read_excel("Violência/dados/Rel - 1015 - CVLI - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx", 
@@ -112,13 +112,15 @@ ggsave("mortes_total_jovens_porano.png", path = "Violência/resultados",
 # CVLI por bairro - total/jovem/total-jovem
 #=========================================#
 
+# contagem de mortes por bairro
+jovem_morte_bairro <- data.frame(table(jv_ano_data_cvli$BAIRRO))
 
+# carregar shapefile 1 (completo)
+shp_recife1 <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
 
+jovem_morte_bairro$localidade <- as.character(jovem_morte_bairro$Var1)
 
-
-
-
-
+mapa.funcao(jovem_morte_bairro, shp_recife1, jovem_morte_bairro$Freq, "CVLI de Jovens por Bairro no Recife")
 
 
 
