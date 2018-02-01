@@ -77,6 +77,7 @@ cvli_data2 <- rbind(x1, x2)
 # gráfico
 ggplot(data = cvli_data2) +
   geom_line(aes(x = Ano, y = Mortes, group = grupo, color = grupo), size = 1) + 
+  geom_label(aes(x = Ano, y = Mortes, label = Mortes))+
   scale_color_manual(values=c("#7f0000", "#E69F00"))+
   scale_y_continuous(limits = c(0,800))+
   theme(legend.position="bottom")
@@ -94,17 +95,6 @@ ggsave("mortes_total_jovens_porano.png", path = "Violência/resultados", width = 
 # CVLI por bairro - total/jovem/total-jovem
 #=========================================#
 
-
-
-
-
-
-
-
-
-
-
-getwd()
 
 
 
