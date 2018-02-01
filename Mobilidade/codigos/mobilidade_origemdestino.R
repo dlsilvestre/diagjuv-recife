@@ -380,13 +380,13 @@ data_meiotransp$prop_transp <- data_meiotransp$meio_transporte_trab / sum(data_m
 data_meiotransp$prop_transp <- round(data_meiotransp$prop_transp, 3)*100
 
 # ordenar para plotagem
-data_meiotransp <- data_meiotransp[order(data_meiotransp$prop_transp),]
-data_meiotransp$prop_transp <- factor(data_meiotransp$prop_transp, levels = data_meiotransp$prop_transp)
+data_meiotransp$transporte <- factor(data_meiotransp$transporte, levels = data_meiotransp$transporte[order(data_meiotransp$prop_transp)])
 
 # 
 ggplot(data_meiotransp, aes(x = transporte, y = prop_transp))+
   geom_bar(stat = "identity", fill = "#15041c") +
   labs(y = "Porcentagem do Total de Jovens Trabalhadores", x = "", title = "Meio de Tranporte dos Jovens p/ Trabalho") +
+  tema_massa()+
   coord_flip()
 
 ggsave("transporte_trabalho.png", path = "Mobilidade/resultados", width = 8.5, height = 5, units = "in")
@@ -424,12 +424,13 @@ data2_meiotransp$prop_transp2 <- round(data2_meiotransp$prop_transp2, 3)*100
 
 # ordenar para plotagem
 data2_meiotransp <- data2_meiotransp[order(data2_meiotransp$prop_transp2),]
-data2_meiotransp$prop_transp2 <- factor(data2_meiotransp$prop_transp2, levels = data2_meiotransp$prop_transp2)
+data2_meiotransp$transporte <- factor(data2_meiotransp$transporte, levels = data2_meiotransp$transporte[order(data2_meiotransp$prop_transp2)])
 
 # 
 ggplot(data2_meiotransp, aes(x = transporte, y = prop_transp2))+
   geom_bar(stat = "identity", fill = "#15041c") +
-  labs(y = "Porcentagem do Total de Jovens Estudantes", x = "", title = "Deslocamento de Jovens Estudantes") +
+  labs(y = "Porcentagem do Total de Jovens Estudantes", x = "", title = "Meio de Tranporte dos Jovens Até local de Estudo") +
+  tema_massa()+
   coord_flip()
 
 ggsave("transporte_estudo.png", path = "Mobilidade/resultados", width = 8.5, height = 5, units = "in")
