@@ -17,10 +17,16 @@
 
 
 # instalar pacotes
-# install.packages(c("readxl", "stringr", "dplyr", "ggplot2"))
+# install.packages(c("readxl", "stringr", "dplyr", "ggplot2", "geojsonio"))
 
 # carregar pacotes
 library(readxl); library(stringr); library(dplyr); library(ggplot2); library(viridis)
+library(maps); library(mapdata); library(raster); library(ggmap); library(ggrepel); 
+library(purrr); library(OpenStreetMap);
+library(sp)
+library(maps)
+library(ggmap)
+library(maptools)
 
 # carregar banco CVLI 2013-2017
 data_cvli <-  read_excel("Violência/dados/Rel - 1015 - CVLI - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx", 
@@ -49,11 +55,10 @@ colnames(data_cvli) <- str_replace(names, "NA", "DATA")
 #=========================#
 
 ggplot(data = data_cvli)+
-  geom_bar(aes(x = data_cvli$IDADE), fill = "#333333")+
+  geom_bar(aes(x = as.numeric(data_cvli$IDADE)), fill = "#333333")+
   geom_vline(xintercept = 15, size = 1, colour = "#FF3721",linetype = "dashed")+
   geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
-  labs(x = "Idade", y = "Frequênica de CVLI")+
-  tema_massa()
+  labs(x = "Idade", y = "Frequênica de CVLI")
   
 
 # salvar grafico
@@ -100,7 +105,7 @@ ggplot(data = cvli_data2) +
 
 # salvar grafico
 ggsave("mortes_total_jovens_porano.png", path = "Violência/resultados",
-       width = 10, height = 5, units = "in")
+       width = 12, height = 8, units = "in")
 
 
 # POR MES
@@ -118,11 +123,59 @@ jovem_morte_bairro <- data.frame(table(jv_ano_data_cvli$BAIRRO))
 # carregar shapefile 1 (completo)
 shp_recife1 <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
 
+# criar variavel localidade como chr
 jovem_morte_bairro$localidade <- as.character(jovem_morte_bairro$Var1)
 
-mapa.funcao(jovem_morte_bairro, shp_recife1, jovem_morte_bairro$Freq, "CVLI de Jovens por Bairro no Recife")
+#==== ABRIR FUNCOES GERAIS E EXECUTAR MAPA ====#
 
+mapa.funcao(shape = shp_recife1, data = jovem_morte_bairro,
+            variable = jovem_morte_bairro$Freq, legendtitle = "CVLI de Jovens \n   (2013-2017)",
+            pallete = "A")
+ggsave("mortes_jovens_bairro_A.png", path = "Violência/resultados",width = 9, height = 12, units = "in")
 
+#==================================================================#
+# CVLI por LOGRADOURO [EXECUTAR EM MAQUINA COM BOM PROCESSAMENTO] 
+#================================================================#
+# checar merge dos bancos: perda significativa de casos
+
+#----------------------#
+# manipular dados
+
+# cvli de jovens
+jovem_cvli <- data_cvli[data_cvli$IDADE >= 15 & data_cvli$IDADE < 30 ,]
+
+# contagem por logradouro
+jovem_cvli_logd <- data.frame(table(jovem_cvli$LOGRADOURO))
+jovem_cvli_logd <- jovem_cvli_logd[order(jovem_cvli_logd$Freq, decreasing = T),]
+
+# baixar e carregar logradouros em geoJSON
+data_url <- "http://dados.recife.pe.gov.br/dataset/c1f100f0-f56f-4dd4-9dcc-1aa4da28798a/resource/18f16fda-32e2-4fe9-a5ab-0e7852258400/download/trechoslogradouros.geojson"
+data_file <- "trechoslogradouros.geojson"
+download.file(data_url, data_file)
+data_json <- geojson_read(data_file, what = "sp")
+
+# visualizar logradouros
+plot(data_json)
+
+# mergir base de dados com dados geo
+jovem_cvli_logd$logradouro_nome <- jovem_cvli_logd$Var1
+data_json$logradouro_nome <- gsub('RUA\\s','', data_json$logradouro_nome) 
+data_json$logradouro_nome <- gsub('AV','', data_json$logradouro_nome) 
+data_json$logradouro_nome <- str_trim(data_json$logradouro_nome, "left")    
+
+# merge data with shapefile
+geoj_data <- merge(data_json, jovem_cvli_logd, by = "logradouro_nome", all = T)
+
+# tranformar shapefile em polygonsdataframe
+data_fortity = fortify(geoj_data, region = "logradouro_nome")
+
+# 
+print(mapImage + geom_line(aes(long, lat, group = group), 
+                           data = data_fortity))
+
+# baixar o mapa de Recife
+mapImage <- ggmap(get_map(c(lon =  -34.884, lat =-8.065), zoom = 12))
+mapImage
 
 
 
