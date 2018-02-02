@@ -167,7 +167,7 @@ data_json@data$Freq[is.na(data_json@data$Freq)] <- 0.0001
 mapa.df     <- fortify(data_json)
 mapa.df     <- join(mapa.df, data_json@data, by="id")
 
-# plotar logradouros e CVLI
+#------ CVLI por logradouro ------#
 ggplot(mapa.df, aes(x=long, y=lat, group=group))+
   geom_line(aes(color= Freq))+
   scale_color_viridis(name = "CVLI de Jovens",option= "A", direction = -1) +
@@ -178,14 +178,12 @@ ggplot(mapa.df, aes(x=long, y=lat, group=group))+
 # baixar o mapa de Recife
 mapImage <-get_map(c(lon =  -34.91, lat =-8.045), zoom = 12)
 
-#====== RECIFE + LOGRADOUROS/CVLI ======#
+#====== MAPA RECIFE + CVLI/LOGRADOUROS ======#
 ggmap(mapImage, extent = "normal", maprange = FALSE)+ 
   geom_line(data = mapa.df, aes(long, lat, group = group, color = Freq))+
   scale_color_viridis(name= "CVLI", option= "A", direction = -1) 
   ggsave("CVLI_jovens_logradouro1.png", path = "Violência/resultados",width = 14, height = 17, units = "in")
 
-
-#----- Recife + CVLI por logradouro -----#
 
 
 
