@@ -136,7 +136,7 @@ ggsave("mortes_jovens_bairro_A.png", path = "Violência/resultados",width = 9, he
 #==================================================================#
 # CVLI por LOGRADOURO [EXECUTAR EM MAQUINA COM BOM PROCESSAMENTO] 
 #================================================================#
-# checar merge dos bancos: perda significativa de casos
+# checar merge dos bancos: perda de casos
 
 #----------------------#
 # manipular dados
@@ -154,28 +154,41 @@ data_file <- "trechoslogradouros.geojson"
 download.file(data_url, data_file)
 data_json <- geojson_read(data_file, what = "sp")
 
-# visualizar logradouros
-plot(data_json)
-
-# mergir base de dados com dados geo
+# tratar nomes na base de dados p mergir
 jovem_cvli_logd$logradouro_nome <- jovem_cvli_logd$Var1
 data_json$logradouro_nome <- gsub('RUA\\s','', data_json$logradouro_nome) 
 data_json$logradouro_nome <- gsub('AV','', data_json$logradouro_nome) 
 data_json$logradouro_nome <- str_trim(data_json$logradouro_nome, "left")    
 
-# merge data with shapefile
-geoj_data <- merge(data_json, jovem_cvli_logd, by = "logradouro_nome", all = T)
+# mergir dados e geo
+data_json@data$id <- rownames(data_json@data)
+data_json@data   <- join(data_json@data, jovem_cvli_logd, by="logradouro_nome")
+data_json@data$Freq[is.na(data_json@data$Freq)] <- 0.0001
+mapa.df     <- fortify(data_json)
+mapa.df     <- join(mapa.df, data_json@data, by="id")
 
-# tranformar shapefile em polygonsdataframe
-data_fortity = fortify(geoj_data, region = "logradouro_nome")
-
-# 
-print(mapImage + geom_line(aes(long, lat, group = group), 
-                           data = data_fortity))
+# plotar logradouros e CVLI
+ggplot(mapa.df, aes(x=long, y=lat, group=group))+
+  geom_line(aes(color= Freq))+
+  scale_color_viridis(name = "CVLI de Jovens",option= "A", direction = -1) +
+  coord_fixed()+
+  theme_void()
+  ggsave("CVLI_jovens_logradouroA.png", path = "Violência/resultados",width = 14, height = 17, units = "in")
 
 # baixar o mapa de Recife
-mapImage <- ggmap(get_map(c(lon =  -34.884, lat =-8.065), zoom = 12))
-mapImage
+mapImage <-get_map(c(lon =  -34.91, lat =-8.045), zoom = 12)
+
+#====== RECIFE + LOGRADOUROS/CVLI ======#
+ggmap(mapImage, extent = "normal", maprange = FALSE)+ 
+  geom_line(data = mapa.df, aes(long, lat, group = group, color = Freq))+
+  scale_color_viridis(name= "CVLI", option= "A", direction = -1) 
+  ggsave("CVLI_jovens_logradouro1.png", path = "Violência/resultados",width = 14, height = 17, units = "in")
+
+
+#----- Recife + CVLI por logradouro -----#
+
+
+
 
 
 
