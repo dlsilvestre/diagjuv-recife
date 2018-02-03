@@ -16,10 +16,10 @@
 # #UseSoftwareLivre                              #
 #------------------------------------------------#
 
-# instalar pacotes necessários
-#install.packages(c("readxl", "xlsx", "ggplot2", "directlabels", "ggrepel", "readr", "plyr", "rgdal", "ggmap", 
-# "maps", "mapdata", "raster", "maptools", "stringi", "DT", "xtable", "gridExtra", "qdap", "ggthemes", "ggpubr", 
-# "dplyr"), dependencies = T)
+# instalar pacotes necessarios
+install.packages(c("readxl", "xlsx", "ggplot2", "directlabels", "ggrepel", "readr", "plyr", "rgdal", "ggmap", 
+ "maps", "mapdata", "raster", "maptools", "stringi", "DT", "xtable", "gridExtra", "qdap", "ggthemes", "ggpubr", 
+ "dplyr"), dependencies = T)
 
 # carregar pacotes
 library(ggthemes); library(qdap); library(readxl); library(xlsx); library(ggplot2); library(directlabels)
@@ -94,12 +94,12 @@ demojovem_2010 <- demojovem_data[demojovem_data$Ano == 2010,]
 #----------------------------------#
 
 # Bairros para cada RPA
-rpa1 <- c("; Recife; Santo Amaro; Boa Vista; Cabanga; Ilha do Leite; Paissandu; Santo Antônio; São José; Coelhos; Soledade; Ilha Joana Bezerra;")
-rpa2 <- c("; Arruda; Campina do Barreto; Encruzilhada; Hipódromo; Peixinhos; Ponto de Parada; Rosarinho; Torreãoo; Água Fria; Alto Santa Terezinha; Bomba do Hemetério; Cajueiro; Fundão; Porto da Madeira; Beberibe; Dois Unidos; Linha do Tiro;")
-rpa3 <- c("; Aflitos; Alto do Mandu; Alto José Bonifácio; Alto José do Pinho; Apipucos; Brejo da Guabiraba; Brejo de Beberibe; Casa Amarela; Casa Forte; Córrego do Jenipapo; Derby; Dois Irmãos; Espinheiro; Graças; Guabiraba; Jaqueira; Macaxeira; Monteiro; Nova Descoberta; Parnamirim; Passarinho; Pau-Ferro; Poço da Panela, Santana; Sítio dos Pintos; Tamarineira; Mangabeira; Morro da Conceição; Vasco da Gama;")
-rpa4 <- c("; Cordeiro; Ilha do Retiro; Iputinga; Madalena; Prado; Torre; Zumbi; Engenho do Meio; Torrões; Caxangá; Cidade Universitária; Várzea;")
-rpa5 <- c("; Afogados; Areias; Barro; Bongi; Caçote; Coqueiral; Curado; Estância; Jardim São Paulo; Jiquiá; Mangueira; Mustardinha; San Martin; Sancho; Tejipió; Totó;")
-rpa6 <- c("; Boa Viagem; Brasília Teimosa; Imbiribeira; Ipsep; Pina; Ibura; Jordão; Cohab;")
+rpa1 <- c("; Recife; Santo Amaro; Boa Vista; Cabanga; Ilha do Leite; Paissandu; Santo Ant?nio; S?o Jos?; Coelhos; Soledade; Ilha Joana Bezerra;")
+rpa2 <- c("; Arruda; Campina do Barreto; Encruzilhada; Hip?dromo; Peixinhos; Ponto de Parada; Rosarinho; Torre?oo; ?gua Fria; Alto Santa Terezinha; Bomba do Hemet?rio; Cajueiro; Fund?o; Porto da Madeira; Beberibe; Dois Unidos; Linha do Tiro;")
+rpa3 <- c("; Aflitos; Alto do Mandu; Alto Jos? Bonif?cio; Alto Jos? do Pinho; Apipucos; Brejo da Guabiraba; Brejo de Beberibe; Casa Amarela; Casa Forte; C?rrego do Jenipapo; Derby; Dois Irm?os; Espinheiro; Gra?as; Guabiraba; Jaqueira; Macaxeira; Monteiro; Nova Descoberta; Parnamirim; Passarinho; Pau-Ferro; Po?o da Panela, Santana; S?tio dos Pintos; Tamarineira; Mangabeira; Morro da Concei??o; Vasco da Gama;")
+rpa4 <- c("; Cordeiro; Ilha do Retiro; Iputinga; Madalena; Prado; Torre; Zumbi; Engenho do Meio; Torr?es; Caxang?; Cidade Universit?ria; V?rzea;")
+rpa5 <- c("; Afogados; Areias; Barro; Bongi; Ca?ote; Coqueiral; Curado; Est?ncia; Jardim S?o Paulo; Jiqui?; Mangueira; Mustardinha; San Martin; Sancho; Tejipi?; Tot?;")
+rpa6 <- c("; Boa Viagem; Bras?lia Teimosa; Imbiribeira; Ipsep; Pina; Ibura; Jord?o; Cohab;")
 
 # funcao para manipular string
 func.mani1 <- function(x){ 
@@ -189,7 +189,7 @@ bar_jovemprop00 <- ggplot(demojovem_2000, aes(x = Localidade, y = prop_jovem_tot
                           geom_label(label = demojovem_2000$prop_jovem_total, 
                                     size = 2.3, color = "black", fontface = "bold") +
                           scale_y_continuous(limits = c(0, 0.38))+
-                          labs(y = "Proporção de Jovens", x = "", title = "2000") +
+                          labs(y = "Propor??o de Jovens", x = "", title = "2000") +
                           coord_flip() +
                           theme_arretado()
   
@@ -205,7 +205,7 @@ bar_jovemprop10 <- ggplot(demojovem_2010, aes(x = Localidade, y = prop_jovem_tot
                           scale_y_continuous(limits = c(0, 0.40))+
                           geom_label(label = demojovem_2010$prop_jovem_total, 
                                     size = 2.3, color = "black", fontface = "bold" ) +
-                          labs(y = "Proporção de Jovens", x = "", title = "2010") +
+                          labs(y = "Propor??o de Jovens", x = "", title = "2010") +
                           theme_arretado()+
                           coord_flip() 
 bar_jovemprop10
@@ -219,7 +219,7 @@ bar_jovemprop00_x <- ggplot(demojovem_2000_x, aes(x = Localidade, y = prop_jovem
   geom_label(label = demojovem_2000_x$prop_jovem_total, 
              size = 4, color = "black") +
   scale_y_continuous(limits = c(0, 0.38))+
-  labs(y = "Proporção de Jovens", x = "", title = "2000") +
+  labs(y = "Propor??o de Jovens", x = "", title = "2000") +
   coord_flip() +
   theme_arretado()
 bar_jovemprop00_x
@@ -231,7 +231,7 @@ bar_jovemprop10_x <- ggplot(demojovem_2010_x, aes(x = Localidade, y = prop_jovem
   scale_y_continuous(limits = c(0, 0.40))+
   geom_label(label = demojovem_2010_x$prop_jovem_total, 
              size = 4, color = "black") +
-  labs(y = "Proporção de Jovens", x = "", title = "2010") +
+  labs(y = "Propor??o de Jovens", x = "", title = "2010") +
   theme_arretado()+
   coord_flip() 
 bar_jovemprop10_x
@@ -239,7 +239,7 @@ bar_jovemprop10_x
 # grid apresentacao
 barra_jovem_propx <- ggarrange(bar_jovemprop00_x, bar_jovemprop10_x, ncol = 2)
 barra_jovem_propx <- annotate_figure(barra_jovem_propx,
-                                     top = text_grob("Proporção de Jovens do Total de Residentes", color = "black", face = "bold", size = 14))
+                                     top = text_grob("Propor??o de Jovens do Total de Residentes", color = "black", face = "bold", size = 14))
 barra_jovem_propx
 ggsave("barra_jovem_propx.png", barra_jovem_propx, width = 10, height = 6, units = "in")
 
@@ -254,11 +254,11 @@ ggsave("barra_jovem_prop.png", barra_jovem_prop, width = 9, height = 13.5, units
 
 #---- 2000 ----#
 
-# cidades com maior proporção de mulheres
+# cidades com maior propor??o de mulheres
 demojovem_2000$pop_jovemwomen[c(1:3)] / demojovem_2000$pop_jovemmen[c(1:3)]
 demojovem_2000[c(1:3),] 
 
-# bairros com maior proporção de homens
+# bairros com maior propor??o de homens
 demojovem_2000$pop_jovemmen[c(92:94)] / demojovem_2000$pop_jovemwomen[c(92:94)] 
 demojovem_2000[c(92:94),] 
 
@@ -268,7 +268,7 @@ demojovem_2000$Localidade <- factor(demojovem_2000$Localidade, levels = demojove
 # Barplot 2000
 bar_jovempop00 <- ggplot(demojovem_2000, aes(x = Localidade, y = pop_jovem))+
                          geom_bar(stat = "identity", fill = "#1c3c40") +
-                         labs(y = "População de Jovens", x = "", title = "2000") +
+                         labs(y = "Popula??o de Jovens", x = "", title = "2000") +
                          geom_label(label = demojovem_2000$pop_jovem,
                          size = 2.3, nudge_x = 0.25, nudge_y = 0.2, color = "black", fontface = "bold") +
                          theme_arretado()+
@@ -282,7 +282,7 @@ demojovem_2010$Localidade <- factor(demojovem_2010$Localidade, levels = demojove
 # Barplot 2010 
 bar_jovempop10 <- ggplot(demojovem_2010, aes(x = Localidade, y = pop_jovem))+
                          geom_bar(stat = "identity", fill = "#1c3c40") +
-                         labs(y = "População de Jovens", x = "", title = "2010") +
+                         labs(y = "Popula??o de Jovens", x = "", title = "2010") +
                          geom_label(label = demojovem_2010$pop_jovem, 
                          size = 2.3, nudge_x = 0.25, nudge_y = 0.2, color = "black", fontface = "bold") +
                          theme_arretado()+
@@ -301,7 +301,7 @@ bar_jovemprop00_x <- ggplot(demojovem_2000_x, aes(x = Localidade, y = pop_jovem)
   geom_bar(stat = "identity", fill = "#1c3c40") +
   geom_label(label = demojovem_2000_x$pop_jovem, 
              size = 3, color = "black") +
-  labs(y = "Proporção de Jovens", x = "", title = "2000") +
+  labs(y = "Propor??o de Jovens", x = "", title = "2000") +
   coord_flip() +
   theme_arretado()
 bar_jovemprop00_x
@@ -312,7 +312,7 @@ bar_jovemprop10_x <- ggplot(demojovem_2010_x, aes(x = Localidade, y = pop_jovem)
   geom_bar(stat = "identity", fill = "#1c3c40") +
   geom_label(label = demojovem_2010_x$pop_jovem, 
              size = 3, color = "black") +
-  labs(y = "Proporção de Jovens", x = "", title = "2010") +
+  labs(y = "Propor??o de Jovens", x = "", title = "2010") +
   theme_arretado()+
   coord_flip() 
 bar_jovemprop10_x
@@ -320,7 +320,7 @@ bar_jovemprop10_x
 # grid apresentacao
 barra_jovem_propx <- ggarrange(bar_jovemprop00_x, bar_jovemprop10_x, ncol = 2)
 barra_jovem_propx <- annotate_figure(barra_jovem_propx,
-                                     top = text_grob("População Absoluta de Jovens", color = "black", face = "bold", size = 14))
+                                     top = text_grob("Popula??o Absoluta de Jovens", color = "black", face = "bold", size = 14))
 barra_jovem_propx
 ggsave("barra_jovem_popx.png", barra_jovem_propx, width = 10, height = 6, units = "in")
 
@@ -346,7 +346,7 @@ data_barsex <- rbind(data_barsex_fem, data_barsex_masc)
 # Barplot 2000 
 barra_sex_2000 <- ggplot(data_barsex, aes(x = Localidade, y = prop_jovem))+
   geom_bar(stat = "identity", aes(fill = Sexo), position = "dodge") +
-  labs(x = "", y = "Proporção", title = "2000") +
+  labs(x = "", y = "Propor??o", title = "2000") +
   scale_fill_manual("Sexo", values = c("Homens" = "#1c3c40", "Mulheres" =  "lightgreen")) +
   scale_y_continuous(limits= c(0, 0.76))+
   theme_arretado()+
@@ -373,7 +373,7 @@ data_barsex2 <- rbind(data_barsex_fem2, data_barsex_masc2)
 # Barplot 2000 
 barra_sex_2010 <- ggplot(data_barsex2, aes(x = Localidade, y = prop_jovem))+
   geom_bar(stat = "identity", aes(fill = Sexo), position = "dodge") +
-  labs(x = "", y = "Proporção", title = "2010") +
+  labs(x = "", y = "Propor??o", title = "2010") +
   scale_fill_manual("Sexo", values = c("Homens" = "#1c3c40", "Mulheres" =  "lightgreen")) +
   scale_y_continuous(limits= c(0, 0.76))+
   theme_arretado()+
@@ -682,7 +682,7 @@ ggplot(data = dataline_rpa, aes(x = Ano, y = prop_jovem_total, group = Localidad
   scale_x_continuous(breaks = c(2000, 2010))+
   geom_text_repel(aes(x = Ano, y = prop_jovem_total, label = dataline_rpa$prop_jovem_total),
                   size = 4, colour = "black", fontface = "bold")+
-  labs(x = "", y = "Proporção de Jovens")
+  labs(x = "", y = "Propor??o de Jovens")
 ggsave("RPA_propjovens_anos.png", width = 9, height = 3.5, units = "in")
 
   
@@ -712,7 +712,7 @@ ggplot(data = dataline_rpa, aes(x = Ano, y = pop_jovem, group = Localidade, colo
   scale_x_continuous(breaks = c(2000, 2010))+
   geom_text(aes(x = dataline_rpa$Ano, y = dataline_rpa$pop_jovem, label = dataline_rpa$pop_jovem, vjust = 0.1, hjust = 0.45),
                   size = 4, colour = "black", fontface = "bold")+
-  labs(x = "", y = "População de Jovens")
+  labs(x = "", y = "Popula??o de Jovens")
 ggsave("RPA_popjovens_anos.png", width = 9, height = 3.5, units = "in")
 
 sum(demojovem_2000$pop_jovem)
@@ -744,7 +744,7 @@ plotsex1 <- ggplot(bar_rpasex00, aes(x = Localidade, y = prop_jovem, fill = Sexo
             position=position_dodge(width=0.9), vjust=-0.20, hjust =0.02, size = 3.3, angle=70)+
   scale_y_continuous(limits= c(0 ,0.6))+
   theme_arretado()+
-  labs(x = "", y = "Proporção de Jovens", title = '2000')
+  labs(x = "", y = "Propor??o de Jovens", title = '2000')
 plotsex1
   
 
@@ -774,7 +774,7 @@ plotsex2 <- ggplot(bar_rpasex10, aes(x = Localidade, y = prop_jovem, fill = Sexo
             position=position_dodge(width=0.9), vjust=-0.20, hjust =0.02, size = 3.3, angle=70)+
   scale_y_continuous(limits= c(0 ,0.6))+
   theme_arretado()+
-  labs(x = "", y = "Proporção de Jovens", title = "2010")
+  labs(x = "", y = "Propor??o de Jovens", title = "2010")
 
 plotsex2
 
@@ -816,7 +816,7 @@ plotpopsex1 <- ggplot(pop_rpasex00, aes(x = Localidade, y = pop_jovem, fill = Se
   geom_text(aes(label = pop_rpasex00$pop_jovem), 
             position=position_dodge(width=0.9), vjust=-0.20, hjust =0.02, size = 3.3, angle=70)+
   theme_arretado()+
-  labs(x = "", y = "População de Jovens", title = '2000')
+  labs(x = "", y = "Popula??o de Jovens", title = '2000')
 plotpopsex1
 
 
@@ -847,7 +847,7 @@ plotpopsex2 <- ggplot(pop_rpasex10, aes(x = Localidade, y = pop_jovem, fill = Se
             position=position_dodge(width=0.9), vjust=-0.20, hjust =0.02, size = 3.3, angle=70)+
   scale_y_continuous(limits= c(0 ,60000))+
   theme_arretado()+
-  labs(x = "", y = "População de Jovens", title = "2010")
+  labs(x = "", y = "Popula??o de Jovens", title = "2010")
 
 plotpopsex2
 
