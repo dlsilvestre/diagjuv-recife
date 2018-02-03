@@ -21,7 +21,6 @@ library(readxl); library(devtools); library(dplyr);  library(ggrepel);
 library(purrr); library(ggplot2);library(stringi); library(rgdal); library(ggplot2); 
 library(maps); library(mapdata); library(raster); library(ggmap)
 
-
 # carregar shapefile 1 (completo)
 shp_recife1 <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
 
@@ -53,10 +52,11 @@ mapa.funcao <- function(shape, data, variable, title) {
   shp_data <- merge(shape, data, by = "EBAIRRNOME", all = T)
   
   # definir labels no mapa
+  shp_data$variavel[is.na(shp_data$variavel)] <- 0
   shp_data <- shp_data[order(shp_data$variavel),]
   shp_data$bairros_detasq <- 1
-  #shp_data$bairros_detasq[1:5] <- ""
-  shp_data$bairros_detasq[c(length(shp_data)-5):c(length(shp_data))] <- ""
+  shp_data$bairros_detasq[1:3] <- ""
+  shp_data$bairros_detasq[c(length(shp_data)-3):c(length(shp_data))] <- ""
   
   shp_data$bairros_detasq <- with(shp_data, paste0(shp_data$bairros_detasq, shp_data$localidade))
   shp_data$bairros_detasq_cod <- grepl(shp_data$bairros_detasq, pattern = "1")
@@ -77,10 +77,10 @@ mapa.funcao <- function(shape, data, variable, title) {
   
   plot <- ggplot(data = map_dataframe, aes(map_id = localidade)) + 
     geom_map(aes(fill = shp_data$variavel), colour = grey(0.85),  map = data_fortity) +
-    expand_limits(x = data_fortity$long, y = data_fortity$lat) + 
+    expand_limits(x = data_fortity$long, y = data_fortity$lat) +
     scale_fill_viridis() +
     geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude),
-                     size = 3, color = "black") + #add labels at centroids
+                     size = 3, color = "black")  #add labels at centroids
     coord_fixed(1) +
    labs(title = title)+
    theme_nothing(legend = T)
