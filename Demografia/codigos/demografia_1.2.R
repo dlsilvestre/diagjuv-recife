@@ -22,8 +22,7 @@
 # carregar pacotes
 library(ggthemes); library(qdap); library(readxl); library(xlsx); library(ggplot2); library(directlabels); library(ggrepel); 
 library(readr); library(plyr); library(rgdal); library(ggmap); library(maps); library(mapdata); library(raster); library(maptools); 
-library(stringi); library(DT); library(xtable); library(ggpubr); library(dplyr); library(readxl); library(qdap)
-library(viridis)
+library(stringi); library(DT); library(xtable); library(ggpubr); library(dplyr); library(readxl); library(qdap); library(viridis)
 
 #---------------------------------#
 #  MANIPULACAO DOS DADOS
@@ -421,114 +420,31 @@ map_propjovem_2010 <- mapa.funcao(shape_recife, demojovem_2010, demojovem_2010$p
 map_propjovem <- ggarrange(map_propjovem_2000, map_propjovem_2010, ncol = 2, common.legend = T, legend = "bottom")
 ggsave("Demografia/resultados/map_propjovem.png", map_propjovem, width = 14, height = 8, units = "in")
 
-#--------------------#
-# map sex
-#--------------------#
+#======== Diferenca da pop de jovens por sexo ========#
 
-#---------------#
-# 2000
+#----- 2000 -----#
+demojovem_2000$dif_jovem_sexo <-  demojovem_2000$pop_mulher_jovem - demojovem_2000$pop_homem_jovem
+map_difsex_2000 <- mapa.funcao(shape_recife, demojovem_2000, demojovem_2000$dif_jovem_sexo, "Diferença")
 
-demojovem_2000$dif_yngmen_ynywom <-  demojovem_2000$prop_jovemwom_jovem - demojovem_2000$prop_jovemmen_jovem
+#----- 2010 -----#
+demojovem_2010$dif_jovem_sexo <-  demojovem_2010$pop_mulher_jovem - demojovem_2010$pop_homem_jovem
+map_difsex_2010 <- mapa.funcao(shape_recife, demojovem_2010, demojovem_2010$dif_jovem_sexo, "Diferença")
 
-# merge data with shapefile
-shp_recife <- shapefile("C:/Users/Monteiro-DataPC/Documents/Research/Juventude OIT PCR/Original Data/Geodata/Bairros.shp")
-shp_recife00_dif <- merge(shp_recife, demojovem_2000, by = "EBAIRRNOME")
+#---- combinar graficos -----#
+map_propjovem <- ggarrange(map_difsex_2000, map_difsex_2010, ncol = 2, common.legend = T, legend = "bottom")
+ggsave("Demografia/resultados/map_jovem_difsexo.png", map_propjovem, width = 14, height = 8, units = "in")
 
-#-------------------------------#
-# map (localidade on neighborhood)
-
-# define labels to be shown in the map
-shp_recife00_dif$bairros_detasq <- 1
-shp_recife00_dif$bairros_detasq[shp_recife00_dif$dif_yngmen_ynywom > 0.104 ] <- ""
-shp_recife00_dif$bairros_detasq[shp_recife00_dif$dif_yngmen_ynywom <= -0.04 ] <- ""
-
-shp_recife00_dif$bairros_detasq <- with(shp_recife00_dif, paste0(shp_recife00_dif$bairros_detasq, shp_recife00_dif$localidade))
-shp_recife00_dif$bairros_detasq_cod <- grepl(shp_recife00_dif$bairros_detasq, pattern = "1")
-shp_recife00_dif$bairros_detasq[shp_recife00_dif$bairros_detasq_cod == TRUE ] <- ""
-
-# tranform shp_recife.fort in data.frame for ggploting
-shp_recife.fort <- fortify(shp_recife00_dif, region = "localidade")
-idList <- shp_recife00_dif@data$localidade
-
-# "coordinates" extracts centroids of the polygons, in the order listed at worldMap@data
-centroids.df <- as.data.frame(coordinates(shp_recife00_dif))
-localidades(centroids.df) <- c("Longitude", "Latitude")  #more sensible column localidades
-
-# This shapefile contained population data, let's plot it.
-popList <- shp_recife00_dif@data$dif_yngmen_ynywom
-localidades <- shp_recife00_dif$bairros_detasq
-
-pop.df <- data.frame(id = idList, Diferen?a = popList, centroids.df, localidades)
-
-library(viridis)
-ggplot(data = pop.df, aes(map_id = id)) + #"id" is col in your df, not in the map object 
-  geom_map(aes(fill = Diferen?a), colour= grey(0.8), map = shp_recife.fort) +
-  expand_limits(x = shp_recife.fort$long, y = shp_recife.fort$lat) +
-  scale_fill_viridis(option = "D", begin = 1, end = 0)+
-  geom_label_repel(aes(label = localidades, x = Longitude, y = Latitude), size = 5, color = "black") + #add labels at centroids
-  coord_fixed(1) +
-  theme_nothing(legend = T)+
-  theme(legend.key.size = unit(1.1, "cm"))+
-  theme(legend.text = element_text(size = 15, hjust = 3, vjust = 3),
-        legend.title = element_text(size = 20))
-#ggsave("map_sexdif_MmenosH_2000.png", width = 8.5, height = 11, units = "in")
-
-#---------------#
-# 2010
-
-demojovem_2010$dif_yngmen_ynywom <-  demojovem_2010$prop_jovemwom_jovem - demojovem_2010$prop_jovemmen_jovem
-
-# merge data with shapefile
-shp_recife <- shapefile("C:/Users/Monteiro-DataPC/Documents/Research/Juventude OIT PCR/Original Data/Geodata/Bairros.shp")
-shp_recife10_dif <- merge(shp_recife, demojovem_2010, by = "EBAIRRNOME")
-
-#-------------------------------#
-# map (localidade on neighborhood)
-
-# define labels to be shown in the map
-shp_recife10_dif$bairros_detasq <- 1
-shp_recife10_dif$bairros_detasq[shp_recife10_dif$dif_yngmen_ynywom > 0.13 ] <- ""
-shp_recife10_dif$bairros_detasq[shp_recife10_dif$dif_yngmen_ynywom <= -0.07 ] <- ""
-
-shp_recife10_dif$bairros_detasq <- with(shp_recife10_dif, paste0(shp_recife10_dif$bairros_detasq, shp_recife10_dif$localidade))
-shp_recife10_dif$bairros_detasq_cod <- grepl(shp_recife10_dif$bairros_detasq, pattern = "1")
-shp_recife10_dif$bairros_detasq[shp_recife10_dif$bairros_detasq_cod == TRUE ] <- ""
-
-# tranform shp_recife.fort in data.frame for ggploting
-shp_recife.fort <- fortify(shp_recife10_dif, region = "localidade")
-idList <- shp_recife10_dif@data$localidade
-
-# "coordinates" extracts centroids of the polygons, in the order listed at worldMap@data
-centroids.df <- as.data.frame(coordinates(shp_recife10_dif))
-localidades(centroids.df) <- c("Longitude", "Latitude")  #more sensible column localidades
-
-# This shapefile contained population data, let's plot it.
-popList <- shp_recife10_dif@data$dif_yngmen_ynywom
-localidades <- shp_recife10_dif$bairros_detasq
-
-pop.df <- data.frame(id = idList, Diferen?a = popList, centroids.df, localidades)
-
-ggplot(data = pop.df, aes(map_id = id)) + #"id" is col in your df, not in the map object 
-  geom_map(aes(fill = Diferen?a), colour= grey(0.8), map = shp_recife.fort) +
-  expand_limits(x = shp_recife.fort$long, y = shp_recife.fort$lat) +
-  scale_fill_viridis(option = "D", begin = 1, end = 0)+
-  geom_label_repel(aes(label = localidades, x = Longitude, y = Latitude), size = 5, color = "black") + #add labels at centroids
-  coord_fixed(1) +
-  theme_nothing(legend = T)+
-  theme(legend.key.size = unit(1.1, "cm"))+
-  theme(legend.text = element_text(size = 15, hjust = 3, vjust = 3),
-        legend.title = element_text(size = 20))
-# ggsave("map_sexdif_MmenosH_2010.png", width = 8.5, height = 11, units = "in")
-
-
-#----------------------------------------------#
+#===============================================#
 #                   RPAS
-#----------------------------------------------#
+#==============================================#
 
-#---- PROPORCAO ----#
-# sum 2 3 4 6, let 1 and 5
-dataprop_rpa00 <- rpa_demo_200010[rpa_demo_200010$Ano == 2000,c("localidade", "Ano", "prop_jovem_total")]
-dataprop_rpa10 <- rpa_demo_200010[rpa_demo_200010$Ano == 2010,c("localidade", "Ano", "prop_jovem_total")]
+#==============================#
+# Comparacao temporal
+
+#====== Prop. de Jovens ======#
+# selecionar casos e variaveis
+dataprop_rpa00 <- rpa_demo_2000[rpa_demo_2000$Ano == 2000,c("localidade", "Ano", "prop_jovem_total")]
+dataprop_rpa10 <- rpa_demo_2010[rpa_demo_2010$Ano == 2010,c("localidade", "Ano", "prop_jovem_total")]
 
 dataline_rpa00 <- data.frame(localidade = c("RPA 1", "RPA 5", "Demais RPAs"), Ano = rep(2000,3), prop_jovem_total = rep(1,3))
 dataline_rpa10 <- data.frame(localidade = c("RPA 1", "RPA 5", "Demais RPAs"), Ano = rep(2010,3), prop_jovem_total = rep(1,3))
@@ -543,25 +459,26 @@ dataline_rpa10$prop_jovem_total[3] <- (sum(dataprop_rpa10$prop_jovem_total[c(2:4
 dataline_rpa <- rbind(dataline_rpa00, dataline_rpa10)
 dataline_rpa$prop_jovem_total <- round(dataline_rpa$prop_jovem_total, 3)
 
-# PLOT
+# grafico
 ggplot(data = dataline_rpa, aes(x = Ano, y = prop_jovem_total, group = localidade, color = localidade)) + 
-  geom_line(aes(linetype=localidade), size=1) +
+  geom_line(aes(linetype=localidade), size=0.8) +
   scale_linetype_manual(values = c(2,1,3)) +
   scale_color_manual(values = c("#325c6c", "#400001", "darkgreen"))+
   theme_arretado()+
   scale_y_continuous(limits= c(0.2, 0.35))+
   scale_x_continuous(breaks = c(2000, 2010))+
   geom_text_repel(aes(x = Ano, y = prop_jovem_total, label = dataline_rpa$prop_jovem_total),
-                  size = 4, colour = "black", fontface = "bold")+
-  labs(x = "", y = "Propor??o de Jovens")
-ggsave("RPA_propjovens_anos.png", width = 9, height = 3.5, units = "in")
+                  size = 3.5, colour = "black", fontface = "bold")+
+  labs(x = "", y = "Proporção de Jovens")
+ggsave("Demografia/resultados/RPA_propjovens_anos.png", width = 9, height = 3.5, units = "in")
 
-  
-# RPA POPULATION
-# sum 5 & 4; 3,2 & 1; let 6
-datapop_rpa00 <- rpa_demo_200010[rpa_demo_200010$Ano == 2000,c("localidade", "Ano", "pop_jovem")]
-datapop_rpa10 <- rpa_demo_200010[rpa_demo_200010$Ano == 2010,c("localidade", "Ano", "pop_jovem")]
+#====== Pop. de Jovens ======#
 
+# selecionar casos e vars
+datapop_rpa00 <- rpa_demo_2000[rpa_demo_2000$Ano == 2000,c("localidade", "Ano", "pop_jovem")]
+datapop_rpa10 <- rpa_demo_2010[rpa_demo_2010$Ano == 2010,c("localidade", "Ano", "pop_jovem")]
+
+# criar banco
 dataline_rpa00 <- data.frame(localidade = c("RPAs 1, 2 e 3", "RPAs 4 e 5", "RPA 6"), Ano = rep(2000,3), pop_jovem = rep(1,3))
 dataline_rpa10 <- data.frame(localidade =c("RPAs 1, 2 e 3", "RPAs 4 e 5", "RPA 6"), Ano = rep(2010,3), pop_jovem = rep(1,3))
 
@@ -573,8 +490,8 @@ dataline_rpa00$pop_jovem[3] <- datapop_rpa00$pop_jovem[6]
 dataline_rpa10$pop_jovem[3] <- datapop_rpa10$pop_jovem[6]
 
 dataline_rpa <- rbind(dataline_rpa00, dataline_rpa10)
-dataline_rpa$pop_jovem <- round(dataline_rpa$pop_jovem)
 
+# grafico
 ggplot(data = dataline_rpa, aes(x = Ano, y = pop_jovem, group = localidade, color = localidade)) + 
   geom_line(aes(linetype=localidade), size=1) +
   scale_linetype_manual(values = c(1,2,3)) +
@@ -583,14 +500,11 @@ ggplot(data = dataline_rpa, aes(x = Ano, y = pop_jovem, group = localidade, colo
   scale_x_continuous(breaks = c(2000, 2010))+
   geom_text(aes(x = dataline_rpa$Ano, y = dataline_rpa$pop_jovem, label = dataline_rpa$pop_jovem, vjust = 0.1, hjust = 0.45),
                   size = 4, colour = "black", fontface = "bold")+
-  labs(x = "", y = "Popula??o de Jovens")
+  labs(x = "", y = "População de Jovens")
 ggsave("RPA_popjovens_anos.png", width = 9, height = 3.5, units = "in")
 
-sum(demojovem_2000$pop_jovem)
-sum(rpa_demo_2000$pop_jovem)
-
-
-#==== PROPORTION BAR ====#
+#=====================#
+# BARRAS
 
 # select variable if interest and recode
 rpa_demo_2000men <- rpa_demo_2000[, c("prop_jovemmen_jovem", "localidade", "Ano")]
@@ -615,7 +529,7 @@ plotsex1 <- ggplot(bar_rpasex00, aes(x = localidade, y = prop_jovem, fill = Sexo
             position=position_dodge(width=0.9), vjust=-0.20, hjust =0.02, size = 3.3, angle=70)+
   scale_y_continuous(limits= c(0 ,0.6))+
   theme_arretado()+
-  labs(x = "", y = "Propor??o de Jovens", title = '2000')
+  labs(x = "", y = "Proporção de Jovens", title = '2000')
 plotsex1
   
 

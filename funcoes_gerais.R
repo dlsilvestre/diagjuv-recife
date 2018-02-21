@@ -38,11 +38,12 @@ tema_massa <- function (base_size = 12, base_family = "") {
 #===============================================#
 
 # teste
-data <- demojovem_2000
-variable <- demojovem_2000$pop_jovem
-shape <- shape_recife
-legendtitle <- "Pop. de Jovens"
-pallete <- "A"
+shape = shp_recife1
+data = jovem_morte_bairro
+variable = jovem_morte_bairro$Freq
+legendtitle = "CVLI Absoluta de Jovens \n     (2013-2017)"
+pallete = "A"
+
 
 # algoritmo
 mapa.funcao <- function(shape, data, variable, legendtitle, pallete) { 
@@ -95,8 +96,8 @@ mapa.funcao <- function(shape, data, variable, legendtitle, pallete) {
   plot = ggplot(data = map_dataframe, aes(map_id = localidade)) + 
     geom_map(aes(fill = shp_data$variavel),colour = grey(0.85),  map = data_fortity) +
     expand_limits(x = data_fortity$long, y = data_fortity$lat) +
-   # scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
-    scale_fill_gradient(name = legendtitle, low="lightgreen", high= "darkblue")+
+    scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
+  # scale_fill_gradient(name = legendtitle, low="lightgreen", high= "darkblue")+
     geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 3, color = "black") + 
     coord_fixed(1) +
     theme_nothing(legend = T)+

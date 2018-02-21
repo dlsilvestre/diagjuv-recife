@@ -15,24 +15,18 @@
 # #UseSoftwareLivre                                  #
 #----------------------------------------------------#
 
-
 # instalar pacotes
 # install.packages(c("readxl", "stringr", "dplyr", "ggplot2", "geojsonio"))
 
 # carregar pacotes
 library(readxl); library(stringr); library(dplyr); library(ggplot2); library(viridis)
 library(maps); library(mapdata); library(raster); library(ggmap); library(ggrepel); 
-library(purrr); library(OpenStreetMap);
-library(sp)
-library(maps)
-library(ggmap)
+library(purrr); library(OpenStreetMap); library(sp); library(maps); library(ggmap)
 library(maptools)
 
 # carregar banco CVLI 2013-2017
 data_cvli <-  read_excel("Violência/dados/Rel - 1015 - CVLI - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx", 
-                         col_types = c("text", "text", "text", 
-                                       "text", "text", "text", "text", "date", 
-                                       "text", "text", "text", "text"))
+                         col_types = c("text", "text", "text","text", "text", "text", "text", "date", "text", "text", "text", "text"))
 
 #===============================#
 # Manipular base
@@ -54,13 +48,13 @@ colnames(data_cvli) <- str_replace(names, "NA", "DATA")
 # CVLI por faixa etaria 
 #=========================#
 
+# grafico
 ggplot(data = data_cvli)+
   geom_bar(aes(x = as.numeric(data_cvli$IDADE)), fill = "#333333")+
   geom_vline(xintercept = 15, size = 1, colour = "#FF3721",linetype = "dashed")+
   geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
   labs(x = "Idade", y = "Frequênica de CVLI")
   
-
 # salvar grafico
 ggsave("mortes_por_idade.png", path = "Violência/resultados",
        width = 8, height = 5, units = "in")
@@ -72,9 +66,11 @@ ggsave("mortes_por_idade.png", path = "Violência/resultados",
 #total
 ano_data_cvli <- data.frame(table(data_cvli$ANO))
 
-# jovem
+# selecionar jovens
 data_cvli$IDADE <- as.numeric(data_cvli$IDADE)
-jv_ano_data_cvli <- data_cvli[data_cvli$IDADE >= 15 & data_cvli$IDADE < 30 ,]
+jovem_cvli <- data_cvli[data_cvli$IDADE >= 15 & data_cvli$IDADE < 30 ,]
+
+# contagem por ano
 jv_ano_data_cvli <- data.frame(table(jv_ano_data_cvli$ANO))
 
 # juntar bases
@@ -104,9 +100,8 @@ ggplot(data = cvli_data2) +
   theme(legend.position="bottom")
 
 # salvar grafico
-ggsave("mortes_total_jovens_porano.png", path = "Violência/resultados",
+ggsave("mortes_total_jovens_tempo.png", path = "Violência/resultados",
        width = 12, height = 8, units = "in")
-
 
 # POR MES
 #mes <- data.frame(table(data_cvli$ANO,data_cvli$MÊS))
@@ -118,7 +113,7 @@ ggsave("mortes_total_jovens_porano.png", path = "Violência/resultados",
 #=========================================#
 
 # contagem de mortes por bairro
-jovem_morte_bairro <- data.frame(table(jv_ano_data_cvli$BAIRRO))
+jovem_morte_bairro <- data.frame(table(jovem_cvli$BAIRRO))
 
 # carregar shapefile 1 (completo)
 shp_recife1 <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
@@ -128,10 +123,11 @@ jovem_morte_bairro$localidade <- as.character(jovem_morte_bairro$Var1)
 
 #==== ABRIR FUNCOES GERAIS E EXECUTAR MAPA ====#
 
-mapa.funcao(shape = shp_recife1, data = jovem_morte_bairro,
-            variable = jovem_morte_bairro$Freq, legendtitle = "CVLI de Jovens \n   (2013-2017)",
+mapa.funcao(shp_recife1, data = jovem_morte_bairro,
+            variable = jovem_morte_bairro$Freq, legendtitle = "CVLI Absoluta de Jovens \n          (2013-2017)",
             pallete = "A")
-ggsave("mortes_jovens_bairro_A.png", path = "Violência/resultados",width = 9, height = 12, units = "in")
+
+ggsave("mortes_jovens_bairro.png", path = "Violência/resultados",width = 9, height = 12, units = "in")
 
 #==================================================================#
 # CVLI por LOGRADOURO [EXECUTAR EM MAQUINA COM BOM PROCESSAMENTO] 
@@ -140,9 +136,6 @@ ggsave("mortes_jovens_bairro_A.png", path = "Violência/resultados",width = 9, he
 
 #----------------------#
 # manipular dados
-
-# cvli de jovens
-jovem_cvli <- data_cvli[data_cvli$IDADE >= 15 & data_cvli$IDADE < 30 ,]
 
 # contagem por logradouro
 jovem_cvli_logd <- data.frame(table(jovem_cvli$LOGRADOURO))
