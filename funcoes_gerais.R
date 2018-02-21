@@ -33,10 +33,18 @@ tema_massa <- function (base_size = 12, base_family = "") {
 }
 
 
-data <- jovem_morte_bairro
-variable <- jovem_morte_bairro$Freq
-shape <- shp_recife1
+#===============================================#
+#              FUNCAO P/ MAPAS                  #
+#===============================================#
 
+# teste
+data <- demojovem_2000
+variable <- demojovem_2000$pop_jovem
+shape <- shape_recife
+legendtitle <- "Pop. de Jovens"
+pallete <- "A"
+
+# algoritmo
 mapa.funcao <- function(shape, data, variable, legendtitle, pallete) { 
   library(stringi); library(ggplot2)
   # function to create merge string based on similarity
@@ -64,8 +72,8 @@ mapa.funcao <- function(shape, data, variable, legendtitle, pallete) {
   shp_data$variavel[is.na(shp_data$variavel)] = 0
   shp_data = shp_data[order(shp_data$variavel),]
   shp_data$bairros_detasq = 1
-  shp_data$bairros_detasq[1:4] = ""
-  shp_data$bairros_detasq[c(length(shp_data)-4):c(length(shp_data))] = ""
+  shp_data$bairros_detasq[1:3] = ""
+  shp_data$bairros_detasq[c(length(shp_data)-2):c(length(shp_data))] = ""
   
   shp_data$bairros_detasq = with(shp_data, paste0(shp_data$bairros_detasq, shp_data$EBAIRRNOME))
   shp_data$bairros_detasq_cod = grepl(shp_data$bairros_detasq, pattern = "1")
@@ -87,15 +95,19 @@ mapa.funcao <- function(shape, data, variable, legendtitle, pallete) {
   plot = ggplot(data = map_dataframe, aes(map_id = localidade)) + 
     geom_map(aes(fill = shp_data$variavel),colour = grey(0.85),  map = data_fortity) +
     expand_limits(x = data_fortity$long, y = data_fortity$lat) +
-    scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
+   # scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
+    scale_fill_gradient(name = legendtitle, low="lightgreen", high= "darkblue")+
     geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 3, color = "black") + 
     coord_fixed(1) +
-    theme_nothing(legend = T)
+    theme_nothing(legend = T)+
+    theme(legend.key.size = unit(1.1, "cm"))+
+    theme(legend.text = element_text(size = 15, hjust = 3, vjust = 3),
+          legend.title = element_text(size = 20))
 
     return(plot)
 }
 
-
+mapa.funcao(shape_recife, demojovem_2000, demojovem_2000$pop_jovem, "Pop. de Jovens")
 
 
 
