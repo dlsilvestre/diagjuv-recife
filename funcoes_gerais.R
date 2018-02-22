@@ -46,7 +46,7 @@ pallete = "A"
 
 
 # algoritmo
-mapa.funcao <- function(shape, data, variable, legendtitle, pallete) { 
+mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) { 
   library(stringi); library(ggplot2)
   # function to create merge string based on similarity
   best_match= function(string_vector,string_replacement){
@@ -98,12 +98,14 @@ mapa.funcao <- function(shape, data, variable, legendtitle, pallete) {
     expand_limits(x = data_fortity$long, y = data_fortity$lat) +
     scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
   # scale_fill_gradient(name = legendtitle, low="lightgreen", high= "darkblue")+
-    geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 3, color = "black") + 
+    geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 3.3, color = "black") +
+    labs(title = maintitle)+
     coord_fixed(1) +
     theme_nothing(legend = T)+
-    theme(legend.key.size = unit(1.1, "cm"))+
-    theme(legend.text = element_text(size = 15, hjust = 3, vjust = 3),
-          legend.title = element_text(size = 20))
+    theme(legend.key.size = unit(0.7, "cm"),
+          legend.text = element_text(size = 14, hjust = 3, vjust = 3),
+          legend.title = element_text(size = 15, face = "plain"),
+          title = element_text(size = 15, face = "bold"))
 
     return(plot)
 }

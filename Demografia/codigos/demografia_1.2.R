@@ -399,13 +399,14 @@ shape_recife <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
 #======= Pop. Absoluta de Jovens =======#
 
 #----- 2000 -----#
-map_popjovem_2000 <- mapa.funcao(shape_recife, demojovem_2000, demojovem_2000$pop_jovem, "Pop. de Jovens")
+map_popjovem_2000 <- mapa.funcao(shape_recife, demojovem_2000, demojovem_2000$pop_jovem, "2000" , "Pop. de Jovens")
 
 #----- 2010 -----#
-map_popjovem_2010 <- mapa.funcao(shape_recife, demojovem_2010, demojovem_2010$pop_jovem, "Pop. de Jovens")
+map_popjovem_2010 <- mapa.funcao(shape_recife, demojovem_2010, demojovem_2010$pop_jovem, "2010", "Pop. de Jovens")
 
 #---- combinar graficos -----#
 map_popjovem <- ggarrange(map_popjovem_2000, map_popjovem_2010, ncol = 2, common.legend = T, legend = "bottom")
+map_popjovem
 ggsave("Demografia/resultados/map_popjovem.png", map_popjovem, width = 14, height = 8, units = "in")
 
 #======= Prop. de Jovens do Total de Residentes =======#

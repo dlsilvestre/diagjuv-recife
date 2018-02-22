@@ -71,7 +71,7 @@ data_cvli$IDADE <- as.numeric(data_cvli$IDADE)
 jovem_cvli <- data_cvli[data_cvli$IDADE >= 15 & data_cvli$IDADE < 30 ,]
 
 # contagem por ano
-jv_ano_data_cvli <- data.frame(table(jv_ano_data_cvli$ANO))
+jv_ano_data_cvli <- data.frame(table(jovem_cvli$ANO))
 
 # juntar bases
 cvli_data1 <- data.frame(ano_data_cvli, jv_ano_data_cvli[,2])
@@ -81,27 +81,27 @@ colnames(cvli_data1) <- c("Ano", "mortesTotais", "mortesJovens")
 cvli_data1 <- mutate(cvli_data1, mortesTotais_jovens = mortesTotais - mortesJovens)
 
 #---- manipular e mergir bases ----#
-x1 <- data.frame(cvli_data1[,c(1:2)], grupo = "Mortes Totais")
-x2 <- data.frame(cvli_data1[,c(1,3)], grupo = "Mortes de Jovens")
-x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "Mortes de Não-jovens")
+x1 <- data.frame(cvli_data1[,c(1:2)], grupo = "CVLI Totais")
+x2 <- data.frame(cvli_data1[,c(1,3)], grupo = "CVLI de Jovens")
+x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "CVLI de Não-jovens")
 
-colnames(x1)[2] <- c("Mortes")
-colnames(x2)[2] <- c("Mortes")
-colnames(x3)[2] <- c("Mortes")
+colnames(x1)[2] <- c("CVLI")
+colnames(x2)[2] <- c("CVLI")
+colnames(x3)[2] <- c("CVLI")
 
 cvli_data2 <- rbind(x2, x3)
 
 # gráfico
 ggplot(data = cvli_data2) +
-  geom_line(aes(x = Ano, y = Mortes, group = grupo, color = grupo), size = 1) + 
-  geom_label(aes(x = Ano, y = Mortes, label = Mortes))+
+  geom_line(aes(x = Ano, y = CVLI, group = grupo, color = grupo), size = 1) + 
+  geom_label(aes(x = Ano, y = CVLI, label = CVLI))+
   scale_color_manual(values=c("#7f0000", "#E69F00"))+
   scale_y_continuous(limits = c(0,800))+
   theme(legend.position="bottom")
 
 # salvar grafico
 ggsave("mortes_total_jovens_tempo.png", path = "Violência/resultados",
-       width = 12, height = 8, units = "in")
+       width = 9, height = 6, units = "in")
 
 # POR MES
 #mes <- data.frame(table(data_cvli$ANO,data_cvli$MÊS))
@@ -124,10 +124,10 @@ jovem_morte_bairro$localidade <- as.character(jovem_morte_bairro$Var1)
 #==== ABRIR FUNCOES GERAIS E EXECUTAR MAPA ====#
 
 mapa.funcao(shp_recife1, data = jovem_morte_bairro,
-            variable = jovem_morte_bairro$Freq, legendtitle = "CVLI Absoluta de Jovens \n          (2013-2017)",
+            variable = jovem_morte_bairro$Freq, "" ,legendtitle = "CVLI de Jovens \n    (2013-2017)",
             pallete = "A")
 
-ggsave("mortes_jovens_bairro.png", path = "Violência/resultados",width = 9, height = 12, units = "in")
+ggsave("mortes_jovens_bairro.png", path = "Violência/resultados",width = 9, height = 11, units = "in")
 
 #==================================================================#
 # CVLI por LOGRADOURO [EXECUTAR EM MAQUINA COM BOM PROCESSAMENTO] 
