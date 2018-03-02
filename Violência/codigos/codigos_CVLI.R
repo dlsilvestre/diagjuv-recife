@@ -48,16 +48,25 @@ colnames(data_cvli) <- str_replace(names, "NA", "DATA")
 # CVLI por faixa etaria 
 #=========================#
 
+# transformar em numerico
+data_cvli$IDADE <- as.numeric(data_cvli$IDADE)
+
 # grafico
 ggplot(data = data_cvli)+
-  geom_bar(aes(x = as.numeric(data_cvli$IDADE)), fill = "#333333")+
+  geom_bar(aes(x = data_cvli$IDADE), fill = "#333333")+
   geom_vline(xintercept = 15, size = 1, colour = "#FF3721",linetype = "dashed")+
   geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
   labs(x = "Idade", y = "Frequênica de CVLI")
-  
-# salvar grafico
-ggsave("mortes_por_idade.png", path = "Violência/resultados",
-       width = 8, height = 5, units = "in")
+ggsave("mortes_por_idade.png", path = "Violência/resultados",width = 8, height = 5, units = "in")
+
+# porcentagem de cvli de jovens do total
+pct_cvli <-data.frame(table(data_cvli$IDADE))
+pct_cvli$Var1 <- as.numeric(as.character(pct_cvli$Var1))
+pct_cvli <- mutate(pct_cvli, jovens = ifelse(Var1 >=15 & Var1 <= 29, 1, 0))
+pct_cvli <- aggregate(pct_cvli$Freq, by=list(Category=pct_cvli$jovens), FUN=sum)
+
+# proporcao de 
+pct_cvli[2, 2] / pct_cvli[1,2]
 
 #=======================#
 # CVLI por ano 
@@ -103,10 +112,27 @@ ggplot(data = cvli_data2) +
 ggsave("mortes_total_jovens_tempo.png", path = "Violência/resultados",
        width = 9, height = 6, units = "in")
 
+#=====================#
 # POR MES
-#mes <- data.frame(table(data_cvli$ANO,data_cvli$MÊS))
-#mes <- mes[order(mes$Var1),]
 
+data_cvli$MÊSx <- factor(data_cvli$MÊS, levels = c("JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL",
+                                                   "AGO", "SET", "OUT", "NOV", "DEZ"))
+
+data_cvli$ANOx <- factor(data_cvli$ANO, levels = c("2013", "2014", "2015", "2016", "2017")) 
+mes <- data.frame(table(data_cvli$MÊSx,data_cvli$ANO))
+
+mes$data <-  with(mes, paste0(mes$Var1, "/",mes$Var2))
+mes$datax <- factor(mes$data, levels = mes$data)
+mes <- mes[-length(mes$Var1),]
+
+ggplot(data = mes, aes(x = datax, y = Freq, group = 1)) +
+  geom_line() +
+  stat_smooth(method = lm)
+# scale_color_manual(values=c("#7f0000", "#E69F00"))+
+#  scale_y_continuous(limits = c(0,800))+
+  #theme(legend.position="bottom")
+
+write.csv(mes, file = "mes.csv")
 
 #=========================================#
 # CVLI por bairro - total/jovem/total-jovem
@@ -176,10 +202,6 @@ ggmap(mapImage, extent = "normal", maprange = FALSE)+
   geom_line(data = mapa.df, aes(long, lat, group = group, color = Freq))+
   scale_color_viridis(name= "CVLI", option= "A", direction = -1) 
   ggsave("CVLI_jovens_logradouro1.png", path = "Violência/resultados",width = 14, height = 17, units = "in")
-
-
-
-
 
 
 

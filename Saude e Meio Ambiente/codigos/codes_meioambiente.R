@@ -1,7 +1,7 @@
 #====================================================#
 # DIAGN?STICO DA JUVENTUDE NA CIDADE DO RECIFE       #              
 #====================================================#
-# SA?DE E MEIO AMBIENTE                              #
+# SAUDE E MEIO AMBIENTE                              #
 #----------------------------------------------------#
 # Secretaria Executiva de Juventude                  #
 #----------------------------------------------------#
@@ -13,6 +13,13 @@
 # Qualquer duvida contate o desenvolvedor            #
 # #UseSoftwareLivre                                  #
 #----------------------------------------------------#
+
+
+#======================================================#
+#------------------------------------------------------#
+# Abra e execute o arquivo 'funcoes_gerais.R'
+#------------------------------------------------------#
+#======================================================#
 
 # instalar pacotes necessarios
  install.packages(c("devtools", "readxl", "dplyr", "viridis"))
@@ -26,28 +33,12 @@ library(readxl); library(devtools)
 shp_recife1 <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
 
 #=================================#
-#           MORTALIDADE    
-#=================================# 
-
-# instalar pacote 'datasus'
-devtools::install_github("danicat/datasus")
-library(datasus)
-
-# selecionar pasta de trabalho do pacote
-datasus.init('Sa?de e Meio Ambiente/dados')
-
-# baixar dados de mortalidade por causas externas para PE
-df <- sim.load("DOEXT", c(2010:2014), "PE")
-
-# PROBLEMA COM O ACESSO AOS ARQUIVOS - ENVIAR MENSAGEM A DANICAT
-
-#=================================#
 #            SANEAMENTO
 #=================================#
 
 # carregar bases
-esgoto2000 <- read_excel("Sa?de e Meio Ambiente/dados/esgotamento-CENSO2000.xls", col_names = FALSE)
-esgoto2010 <- read_excel("Sa?de e Meio Ambiente/dados/esgotamento-CENSO2010.xls", col_names = FALSE)
+esgoto2000 <- read_excel("Saude e Meio Ambiente/dados/esgotamento-CENSO2000[bairrosPE].xls", col_names = FALSE)
+esgoto2010 <- read_excel("Saude e Meio Ambiente/dados/esgotamento-CENSO2010[bairrosPE].xls", col_names = FALSE)
 
 # selecionar bairros do Recife
 esgoto2000 <- esgoto2000[712:805,]
@@ -72,8 +63,9 @@ colnames(esgoto2010) <- c("localidade", "total_domicilios", "possui_banheiro_tot
 esgoto2000 <- mutate(esgoto2000, taxa_esgotamento = round((possui_banheiro_total / total_domicilios), 3)*100 )
 esgoto2010 <- mutate(esgoto2010, taxa_esgotamento = round((possui_banheiro_total / total_domicilios), 3)*100 )
 
-# mapa taxa esgotamento 
-mapa_esgoto_2000 <- mapa.funcao(shp_recife1, esgoto2000, esgoto2000$taxa_esgotamento,"2000", "Taxa de Esgotamento Sanit?rio", "D")
+#====== mapa taxa esgotamento =======#
+mapa_esgoto_2000 <- mapa.funcao(shp_recife1, esgoto2000, esgoto2000$taxa_esgotamento,
+                                "2000", "Taxa de Esgotamento Sanitário", "D")
 mapa_esgoto_2010 <- mapa.funcao(shp_recife1, esgoto2010, esgoto2010$taxa_esgotamento, "2010","Taxa de Esgotamento Sanit?rio", "D")
 
 # cambinar e salvar mapas
