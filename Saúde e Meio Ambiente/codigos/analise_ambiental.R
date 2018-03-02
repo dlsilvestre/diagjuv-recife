@@ -17,77 +17,13 @@
 # instalar pacotes necessarios
 # install.packages(c("devtools", "readxl"))
 
-library(readxl); library(devtools); library(dplyr);  library(ggrepel); 
+library(readxl); library(devtools); library(dplyr);  library(ggrepel); library(dplyr); library(viridis)
 library(purrr); library(ggplot2);library(stringi); library(rgdal); library(ggplot2); 
-library(maps); library(mapdata); library(raster); library(ggmap)
+library(maps); library(mapdata); library(raster); library(ggmap);
+library(readxl); library(devtools)
 
 # carregar shapefile 1 (completo)
 shp_recife1 <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
-
-#=================================#
-
-#==== MAP FUNCTION ====#
-cc <- scales::seq_gradient_pal("blue", "red", "Lab")(seq(0,1,length.out=100))
-
-mapa.funcao <- function(shape, data, variable, title) { 
-  # function to create merge string based on similarity
-  best_match= function(string_vector,string_replacement){
-    s<-string_replacement %>% 
-      purrr::map_int(~{
-        .x %>% 
-          RecordLinkage::levenshteinSim(string_vector) %>%
-          match(max(.),.)
-      })
-    string_vector[s] = string_replacement
-    return(string_vector)
-  }
-  
-  data$EBAIRRNOME = data$localidade
-  data$EBAIRRNOME = toupper(data$EBAIRRNOME)
-  data$EBAIRRNOME = stri_trans_general(data$EBAIRRNOME , "Latin-ASCII")
-  data$EBAIRRNOME = best_match(data$EBAIRRNOME, shape$EBAIRRNOME)
-  data$variavel <- variable
-
-  # merge data with shapefile
-  shp_data <- merge(shape, data, by = "EBAIRRNOME", all = T)
-  
-  # definir labels no mapa
-  shp_data$variavel[is.na(shp_data$variavel)] <- 0
-  shp_data <- shp_data[order(shp_data$variavel),]
-  shp_data$bairros_detasq <- 1
-  shp_data$bairros_detasq[1:3] <- ""
-  shp_data$bairros_detasq[c(length(shp_data)-3):c(length(shp_data))] <- ""
-  
-  shp_data$bairros_detasq <- with(shp_data, paste0(shp_data$bairros_detasq, shp_data$localidade))
-  shp_data$bairros_detasq_cod <- grepl(shp_data$bairros_detasq, pattern = "1")
-  shp_data$bairros_detasq[shp_data$bairros_detasq_cod == TRUE ] <- ""
-  
-  # tranformar shapefile em polygonsdataframe
-  data_fortity <- fortify(shp_data, region = "localidade")
-  localidade <- shp_data@data$localidade
-  
-  # extrair centroides dos poligonos
-  centroids.df <- as.data.frame(coordinates(shp_data))
-  names(centroids.df) <- c("Longitude", "Latitude")  #more sensible column localidades
-  
-  # This shapefile contained population data, let's plot it.
-  variavel <- shp_data@data$variavel
-  nomes_centroides <- shp_data$bairros_detasq
-  map_dataframe <- data.frame(localidade, variavel, centroids.df, nomes_centroides)
-  
-  plot <- ggplot(data = map_dataframe, aes(map_id = localidade)) + 
-    geom_map(aes(fill = shp_data$variavel), colour = grey(0.85),  map = data_fortity) +
-    expand_limits(x = data_fortity$long, y = data_fortity$lat) +
-    scale_fill_viridis() +
-    geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude),
-                     size = 3, color = "black")  #add labels at centroids
-    coord_fixed(1) +
-   labs(title = title)+
-   theme_nothing(legend = T)
-  return(plot)
-}
-
-library(readxl); library(devtools)
 
 #=================================#
 #           MORTALIDADE    
@@ -113,29 +49,37 @@ df <- sim.load("DOEXT", c(2010:2014), "PE")
 esgoto2000 <- read_excel("Saúde e Meio Ambiente/dados/esgotamento-CENSO2000.xls", col_names = FALSE)
 esgoto2010 <- read_excel("Saúde e Meio Ambiente/dados/esgotamento-CENSO2010.xls", col_names = FALSE)
 
-# selecionar dados por bairros
+# selecionar bairros do Recife
 esgoto2000 <- esgoto2000[712:805,]
 esgoto2010 <- esgoto2010[1018:1111,]
 
-# recodificar variaveis
-colnames(esgoto2000) 
+# Transformar "-" em "0"
+esgoto2010 <- data.frame(sapply(esgoto2010, function(x) gsub("-", "0", as.character(x))), stringsAsFactors = F)
+
+# transformar em numeric
+esgoto2000 <- data.frame(esgoto2000[,1], lapply(esgoto2000[,2:11], as.numeric))
+esgoto2010 <- data.frame(esgoto2010[,1], lapply(esgoto2010[,2:8], as.numeric))
+
+# renomear variaveis
+colnames(esgoto2000) <- c("localidade", "total_domicilios", "possui_banheiro_total", "esgotamento_geral_pluvial", 
+                          "esgotamento_fossa_septica","esgotamento_fossa_rudimentar","esgotamento_vala", "esgotamento_rio_lago_mar", 
+                          "esgotamento_outro", "nao_possui_banheiro", "codigo")
+
 colnames(esgoto2010) <- c("localidade", "total_domicilios", "possui_banheiro_total", "esgotamento_geral_pluvial", 
                           "esgotamento_fossa_septica", "esgotamento_outro", "nao_possui_banheiro", "codigo")
 
-# transformar em numeric
-esgoto2010 <- data.frame(esgoto2010[,1], lapply(esgoto2010[,2:8], as.numeric))
-
-# calcular prop. de domicilios com esgotamento sanitario
+# calcular percent de domicilios com esgotamento sanitario
+esgoto2000 <- mutate(esgoto2000, taxa_esgotamento = round((possui_banheiro_total / total_domicilios), 3)*100 )
 esgoto2010 <- mutate(esgoto2010, taxa_esgotamento = round((possui_banheiro_total / total_domicilios), 3)*100 )
 
-# mapa esgotamento absoluto
-mapa.funcao(shp_recife1, esgoto2010, esgoto2010$possui_banheiro_total, "Domicilios com Esgotamento Sanitário")
-ggsave("esgotamento_absoluto.png", path = "Saúde e Meio Ambiente/resultados", acid2, width = 15, height = 9, units = "in")
+# mapa taxa esgotamento 
+mapa_esgoto_2000 <- mapa.funcao(shp_recife1, esgoto2000, esgoto2000$taxa_esgotamento,"2000", "Taxa de Esgotamento Sanitário", "D")
+mapa_esgoto_2010 <- mapa.funcao(shp_recife1, esgoto2010, esgoto2010$taxa_esgotamento, "2010","Taxa de Esgotamento Sanitário", "D")
 
-# mapa prop. esgotamento
-mapa.funcao(shp_recife1, esgoto2010, esgoto2010$taxa_esgotamento, "Taxa de Domicilios com Esgotamento Sanitário")
-ggsave("esgotamento_taxa.png", path = "Saúde e Meio Ambiente/resultados", acid2, width = 15, height = 9, units = "in")
-
+# cambinar e salvar mapas
+mapa_taxa_esgotamento <- ggarrange(mapa_esgoto_2000, mapa_esgoto_2010, ncol = 2, common.legend = T, legend = "bottom")
+ggsave("mapa_taxa_esgotamento.png", path = "Saúde e Meio Ambiente/resultados", 
+       mapa_taxa_esgotamento, width = 14, height = 8, units = "in")
 
 
 
