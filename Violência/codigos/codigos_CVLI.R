@@ -104,35 +104,46 @@ cvli_data2 <- rbind(x2, x3)
 ggplot(data = cvli_data2) +
   geom_line(aes(x = Ano, y = CVLI, group = grupo, color = grupo), size = 1) + 
   geom_label(aes(x = Ano, y = CVLI, label = CVLI))+
+  labs(x = "", y = "Casos CVLI")+
   scale_color_manual(values=c("#7f0000", "#E69F00"))+
   scale_y_continuous(limits = c(0,800))+
-  theme(legend.position="bottom")
+  theme_minimal()%+replace% 
+  theme(legend.position="bottom",
+    axis.text.x = element_text(size=8,hjust=.5,vjust=.5,face="plain"),
+        axis.text.y = element_text(size=11,angle=0,hjust=1,vjust=0,face="plain"), 
+        axis.title.y = element_text(colour="black",size=12,angle=90,face="plain"),
+        title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="plain"))
 
 # salvar grafico
 ggsave("mortes_total_jovens_tempo.png", path = "Violência/resultados",
-       width = 9, height = 6, units = "in")
+       width = 8, height = 4, units = "in")
 
 #=====================#
 # POR MES
 
+# ordernar meses
 data_cvli$MÊSx <- factor(data_cvli$MÊS, levels = c("JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL",
                                                    "AGO", "SET", "OUT", "NOV", "DEZ"))
-
+# ordenar anos
 data_cvli$ANOx <- factor(data_cvli$ANO, levels = c("2013", "2014", "2015", "2016", "2017")) 
 mes <- data.frame(table(data_cvli$MÊSx,data_cvli$ANO))
 
+# 
 mes$data <-  with(mes, paste0(mes$Var1, "/",mes$Var2))
 mes$datax <- factor(mes$data, levels = mes$data)
 mes <- mes[-length(mes$Var1),]
 
+# grafico
 ggplot(data = mes, aes(x = datax, y = Freq, group = 1)) +
-  geom_line() +
-  stat_smooth(method = lm)
-# scale_color_manual(values=c("#7f0000", "#E69F00"))+
-#  scale_y_continuous(limits = c(0,800))+
-  #theme(legend.position="bottom")
-
-write.csv(mes, file = "mes.csv")
+  geom_line(color = "#7f0000") +
+  stat_smooth(method = lm, color= "#E69F00", se = F)+
+  labs(x = "", y= "Casos de CVLI")+
+  theme_minimal()%+replace% 
+  theme(axis.text.x = element_text(size=8,hjust=.5,vjust=.5,angle=75,face="plain"),
+        axis.text.y = element_text(size=11,angle=0,hjust=1,vjust=0,face="plain"), 
+        axis.title.y = element_text(colour="black",size=12,angle=90,face="plain"),
+        title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="plain"))
+ggsave("cvli_jovens.png", path = "Violência/resultados", width = 8, height = 4, units = "in")
 
 #=========================================#
 # CVLI por bairro - total/jovem/total-jovem
