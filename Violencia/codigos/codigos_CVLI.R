@@ -44,16 +44,21 @@ cvli_data <- read_excel("Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro
 # Manipular base
 
 # remover linhas
-cvli_data <- cvli_data[-c(1:5, 2932:2942 ),]
+cvli_data <- cvli_data[-c(1:5, 2932:2942 ),-4]
 
 # primeira linha do banco p colnames
 names <- c(cvli_data[1,])
 
-# retirar primeira linha
-cvli_data <-  cvli_data[-1,]
+# retirar primeira linha 
+cvli_data <-  cvli_data[-1, ]
 
 # renomear colunas adequadamente
 colnames(cvli_data) <- str_replace(names, "NA", "DATA")
+
+# jovem
+cvli_data$IDADE <- as.numeric(cvli_data$IDADE)
+cvli_data <- mutate(cvli_data, jovem = ifelse(IDADE >= 15 & IDADE <=  29, 1, 0))
+cvli_jovem <- cvli_data[cvli_data$jovem == 1,]
 
 #=========================#
 # CVLI por faixa etaria 
@@ -105,7 +110,7 @@ cvli_data1 <- mutate(cvli_data1, mortesTotais_jovens = mortesTotais - mortesJove
 #---- manipular e mergir bases ----#
 x1 <- data.frame(cvli_data1[,c(1:2)], grupo = "CVLI Totais")
 x2 <- data.frame(cvli_data1[,c(1,3)], grupo = "CVLI de Jovens")
-x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "CVLI de Não-jovens")
+x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "CVLI de N?o-jovens")
 
 colnames(x1)[2] <- c("CVLI")
 colnames(x2)[2] <- c("CVLI")
@@ -120,8 +125,7 @@ ggplot(data = cvli_data2) +
   labs(x = "", y = "Casos CVLI")+
   scale_color_manual(values=c("#7f0000", "#E69F00"))+
   scale_y_continuous(limits = c(0,500))+
-  tema_massa()%+replace% 
-  theme(legend.position = "bottom")
+  tema_massa()
 
 # salvar grafico
 ggsave("mortes_total_jovens_tempo.png", path = "Violencia/resultados",
@@ -153,6 +157,33 @@ ggplot(data = mes, aes(x = datax, y = Freq, group = 1)) +
 #=========================================#
 # CVLI por bairro 
 #=========================================#
+
+  
+  #------ Barra -------#
+  
+cvli_bairro_jovem <- data.frame(table(cvli_jovem$BAIRRO))
+cvli_bairro_jovem$Var1 <- factor(cvli_bairro_jovem$Var1, 
+                                       levels = cvli_bairro_jovem$Var1[order(cvli_bairro_jovem$Freq)])
+  
+  cvli_bairro_jovem <- mutate(cvli_bairro_jovem, prop = round(((Freq / sum(Freq))*100), 1))  
+  cvli_bairro_jovem$prop2 <- paste(cvli_bairro_jovem$prop, "%", sep="")
+  
+  ggplot(data = cvli_bairro_jovem, aes(Var1, y = prop))+
+    geom_col(fill = "#FF872F")+
+    geom_text(aes(label = prop2))+
+    labs(x = "", y = "Casos de Estupros do Total")+
+    coord_flip()+
+    tema_massa()%+replace% 
+    theme(axis.text.x = element_text(size=10,hjust=.5,vjust=.5,face="plain"),
+          axis.text.y = element_text(size=9,angle=0,hjust=1,vjust=0,face="plain"), 
+          axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
+          axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
+          title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
+  
+  ggsave("mortes_por_bairro_BARRA_ABS.png", path = "Violencia/resultados",width = 4, height = 10, units = "in")
+  
+  
+  
 
 #===================#
 # Absoluto
@@ -235,7 +266,7 @@ ggmap(mapImage, extent = "normal", maprange = FALSE)+
 # CVLI por raca 
 
 # contar e manipular
-cvli_raca_count <- data.frame(table(jovem_cvli$`COR DA PELE`))
+cvli_raca_count <- data.frame(table(jovem_cvli$`COR DA PELE`, jovem_cvli$SEXO))
 cvli_raca_count$Var1 <- as.character(cvli_raca_count$Var1)
 cvli_raca_count$Var1[3] <- "Não Informada"
 
@@ -251,10 +282,9 @@ cvli_raca_count$Var1 <- factor(cvli_raca_count$Var1,
 ggplot(cvli_raca_count, aes(x = Var1, y = Freq))+
   geom_col(fill = "#333333")+
   geom_label(aes(label = prop), size = 3.2)+
-  labs(x ="", y = "Porcent. do Total de CVLI de Jovens") +
-  tema_massa()+
+  labs(x ="", y = "Porcent. de Representantes") +
   coord_flip()
-ggsave("cvli_jovens_RACA.png", path = "Violencia/resultados",width = 8, height = 3, units = "in")
+#ggsave("cvli_jovens_RACA.png", path = "Violencia/resultados",width = 7, height = 3, units = "in")
 
 #==========================#
 # CVLI por sexo 
@@ -276,9 +306,9 @@ cvli_sex_count$Var1 <- factor(cvli_sex_count$Var1,
 ggplot(cvli_sex_count, aes(x = Var1, y = Freq))+
   geom_col(fill = "#333333")+
   geom_label(aes(label = prop), size = 3.2)+
-  labs(x ="", y = "Porcent. do Total de CVLI de Jovens") +
-  tema_massa()+
-  coord_flip()
+  labs(x ="", y = "Porcent. de Representantes") +
+  coord_flip()+
+  tema_massa()
 ggsave("cvli_jovens_sexo.png", path = "Violencia/resultados",width = 7, height = 2, units = "in")
 
 #=============================#
@@ -303,6 +333,10 @@ estupros_data <-  estupros_data[-1,]
 # renomear colunas adequadamente
 colnames(estupros_data) <- str_replace(names_est, "NA", "DATA")
 
+# jovens
+estupros_data <- mutate(estupros_data, jovem = ifelse(IDADE >= 15 & IDADE <= 29, 1, 0))
+estupros_data_jovem <- estupros_data_jovem[estupros_data$jovem ==1, ]
+
 #============================#
 # Estupros por faixa-etaria
 
@@ -314,8 +348,7 @@ ggplot(data = estupros_data)+
   geom_bar(aes(x = estupros_data$IDADE), fill = "#333333")+
   geom_vline(xintercept = 15, size = 1, colour = "#FF3721",linetype = "dashed")+
   geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
-  labs(x = "Idade", y = "Frequênica de Estupros")+
-  tema_massa()
+  labs(x = "Idade", y = "Frequênica de Estupros")
 ggsave("estupro_por_idade.png", path = "Violencia/resultados",width = 8, height = 5, units = "in")
 
 # porcentagem de cvli de jovens do total
@@ -327,56 +360,45 @@ pct_est <- aggregate(pct_est$Freq, by=list(Category=pct_est$jovens), FUN=sum)
 # proporcao de 
 pct_est[2, 2] / pct_est[1,2] 
 
-
-#=======================#
-# Estupros por ano 
-#=======================#
-
-#total
-ano_est_data <- data.frame(table(estupros_data$ANO))
-
-# selecionar jovens
-estupros_data$IDADE <- as.numeric(estupros_data$IDADE)
-jovem_est <- estupros_data[estupros_data$IDADE >= 15 & estupros_data$IDADE < 30 ,]
-
-# contagem por ano
-jovem_est <- data.frame(table(jovem_est$ANO))
-
-# juntar bases
-est_data <- data.frame(ano_est_data, jovem_est[,2])
-colnames(est_data) <- c("Ano", "estTotais", "est_jovens")
-
-# total -jovem
-est_data <- mutate(est_data, est_total_jovens = estTotais - est_jovens)
-
-#---- manipular e mergir bases ----#
-x1 <- data.frame(est_data[,c(1:2)], grupo = "Estupros Totais")
-x2 <- data.frame(est_data[,c(1,3)], grupo = "Estupros de Jovens")
-x3 <- data.frame(est_data[,c(1,4)], grupo = "Estupros de Não-jovens")
-
-colnames(x1)[2] <- c("Estupros")
-colnames(x2)[2] <- c("Estupros")
-colnames(x3)[2] <- c("Estupros")
-
-est_data2 <- rbind(x2, x3)
-
-# grafico
-ggplot(data = est_data2) +
-  geom_line(aes(x = Ano, y = Estupros, group = grupo, color = grupo), size = 1) + 
-  geom_label(aes(x = Ano, y = Estupros, label = Estupros))+
-  labs(x = "", y = "Casos Estupros")+
-  scale_color_manual(values=c("#7f0000", "#E69F00"))+
-  scale_y_continuous(limits = c(0,500))+
-  tema_massa()%+replace% 
-  theme(legend.position = "bottom")
-
-# salvar grafico
-ggsave("est_total_jovens_tempo.png", path = "Violencia/resultados",
-       width = 8, height = 4, units = "in")
-
-
 #=============================#
 # Estupros por bairro
+
+#------ Barra -------#
+estupros_bairro_jovem <- data.frame(table(estupros_data_jovem$BAIRRO))
+estupros_bairro_jovem$Var1 <- factor(estupros_bairro_jovem$Var1, 
+                              levels = estupros_bairro_jovem$Var1[order(estupros_bairro_jovem$Freq)])
+
+estupros_bairro_jovem <- mutate(estupros_bairro_jovem, prop = round(((Freq / sum(Freq))*100), 1))  
+estupros_bairro_jovem$prop2 <- paste(estupros_bairro_jovem$prop, "%", sep="")
+
+ggplot(data = estupros_bairro_jovem, aes(Var1, y = prop))+
+  geom_col(fill = "#FF872F")+
+  geom_text(aes(label = prop2))+
+  labs(x = "", y = "Casos de Estupros Jovens do Total")+
+  coord_flip()+
+  tema_massa()%+replace% 
+  theme(axis.text.x = element_text(size=10,hjust=.5,vjust=.5,face="plain"),
+        axis.text.y = element_text(size=9,angle=0,hjust=1,vjust=0,face="plain"), 
+        axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
+        axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
+        title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
+
+ggsave("estupros_por_bairro_BARRA_ABS.png", path = "Violencia/resultados",width = 4, height = 10, units = "in")
+
+#----- mapa jovens -----#
+
+# criar variavel localidade como chr
+estupros_bairro_jovem$localidade <- as.character(estupros_bairro_jovem$Var1)
+
+# proporcional
+estupros_bairro_jovem <- mutate(estupros_bairro_jovem, prop = (Freq / sum(Freq))*100)  
+
+# mapa
+Est_jovemMap <- mapa.funcao(shp_recife1, data = estupros_bairro_jovem,
+             variable = estupros_bairro_jovem$Freq, "Estupros De Jovens" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
+             pallete = "A")
+
+#------ Mapa total  ------#
 
 # contagem 
 estupros_data_bairro <- data.frame(table(estupros_data$BAIRRO))
@@ -384,13 +406,17 @@ estupros_data_bairro <- data.frame(table(estupros_data$BAIRRO))
 # criar variavel localidade como chr
 estupros_data_bairro$localidade <- as.character(estupros_data_bairro$Var1)
 
-#==== ABRIR FUNCOES GERAIS E EXECUTAR MAPA ====#
+# proporcional
+estupros_data_bairro <- mutate(estupros_data_bairro, prop = (Freq / sum(Freq))*100)  
 
-mapa.funcao(shp_recife1, data = estupros_data_bairro,
-            variable = estupros_data_bairro$Freq, "" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
+# mapa
+EstMap <- mapa.funcao(shp_recife1, data = estupros_data_bairro,
+            variable = estupros_data_bairro$prop, "Estupros Totais" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
             pallete = "A")
 
-ggsave("est_abs_jovens_bairro.png", path = "Viol?ncia/resultados",width = 9, height = 11, units = "in")
+#----- combinar -----#
+ggarrange(EstMap, Est_jovemMap, ncol = 2, common.legend = T, legend = "bottom")
+ggsave("Violencia/resultados/MAPA_ESTUPROS.png", width = 13, height = 7, units = "in")
 
 #==========================#
 # Estupro por raca
@@ -398,6 +424,7 @@ ggsave("est_abs_jovens_bairro.png", path = "Viol?ncia/resultados",width = 9, hei
 # contar e manipular
 est_raca_count <- data.frame(table(estupros_data$`COR DA PELE`))
 est_raca_count$Var1 <- as.character(est_raca_count$Var1)
+
 #est_raca_count <- est
 est_raca_count$Var1 <- c("Amarela","Branca", "Desconhecida/Não Informada", "Não Informada",
                          "Negra", "Parda", "Indígena")
@@ -418,8 +445,9 @@ ggplot(est_raca_count, aes(x = Var1, y = Freq))+
   labs(x ="", y = "Porcent. do Total de Estupros") +
   coord_flip()+
   tema_massa()
-ggsave("est_jovens_RACA.png", path = "Violencia/resultados",width = 8, height = 3, units = "in")
+ggsave("cvli_jovens_RACA.png", path = "Violencia/resultados",width = 8, height = 3, units = "in")
 
+#========================#
 
 
 

@@ -69,7 +69,7 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
   # merge data with shapefile
   shp_data <- merge(shape, data, by = "EBAIRRNOME", all = T)
   
-  # definir labels no mapa (4 maiores, 4 menores)
+  # definir labels no mapa (3 maiores, 3 menores)
   shp_data$variavel[is.na(shp_data$variavel)] = 0
   shp_data = shp_data[order(shp_data$variavel),]
   shp_data$bairros_detasq = 1
@@ -101,8 +101,7 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
     geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 3.3, color = "black") +
     labs(title = maintitle)+
     coord_fixed(1) +
-    theme_nothing(#legend = T
-      )
+    theme_nothing(legend = T)
     theme(legend.key.size = unit(0.7, "cm"),
           legend.text = element_text(size = 14, hjust = 3, vjust = 3),
           legend.title = element_text(size = 15, face = "plain"),
