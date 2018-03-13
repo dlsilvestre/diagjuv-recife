@@ -22,7 +22,7 @@
 #======================================================#
 
 # instalar pacotes necessarios
- install.packages(c("devtools", "readxl", "dplyr", "viridis"))
+# install.packages(c("devtools", "readxl", "dplyr", "viridis"))
 
 library(readxl); library(devtools); library(dplyr);  library(ggrepel); library(dplyr); library(viridis)
 library(purrr); library(ggplot2);library(stringi); library(rgdal); library(ggplot2); 
@@ -64,14 +64,14 @@ esgoto2000 <- mutate(esgoto2000, taxa_esgotamento = round((possui_banheiro_total
 esgoto2010 <- mutate(esgoto2010, taxa_esgotamento = round((possui_banheiro_total / total_domicilios), 3)*100 )
 
 #====== mapa taxa esgotamento =======#
-mapa_esgoto_2000 <- mapa.funcao(shp_recife1, esgoto2000, esgoto2000$taxa_esgotamento,
-                                "2000", "Taxa de Esgotamento Sanitário", "D")
+mapa_esgoto_2000 <- mapa.funcao(shp_recife1, esgoto2000, esgoto2000$taxa_esgotamento, "2000", "Taxa de Esgotamento Sanitário", "D")
+mapa_esgoto_2000
+
 mapa_esgoto_2010 <- mapa.funcao(shp_recife1, esgoto2010, esgoto2010$taxa_esgotamento, "2010","Taxa de Esgotamento Sanit?rio", "D")
 
 # cambinar e salvar mapas
 mapa_taxa_esgotamento <- ggarrange(mapa_esgoto_2000, mapa_esgoto_2010, ncol = 2, common.legend = T, legend = "bottom")
-ggsave("mapa_taxa_esgotamento.png", path = "Sa?de e Meio Ambiente/resultados", 
-       mapa_taxa_esgotamento, width = 14, height = 8, units = "in")
+ggsave("capa.png", path = "Saude e Meio Ambiente/resultados", width = 7, height = 11, units = "in")
 
 
 

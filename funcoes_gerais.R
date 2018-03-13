@@ -17,7 +17,7 @@
 
 
 # tema ggplot2 para graficos
-tema_massa <- function (base_size = 12, base_family = "") {
+temamassa <- function (base_size = 12, base_family = "") {
   theme_minimal(base_size = base_size, base_family = base_family) %+replace% 
     theme(axis.text.x = element_text(colour= "black",size=11,hjust=.5,vjust=.5,face="plain"),
           axis.text.y = element_text(colour="black",size=11,angle=0,hjust=1,vjust=0,face="plain"), 
@@ -101,7 +101,8 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
     geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 3.3, color = "black") +
     labs(title = maintitle)+
     coord_fixed(1) +
-    theme_nothing(legend = T)+
+    theme_nothing(#legend = T
+      )
     theme(legend.key.size = unit(0.7, "cm"),
           legend.text = element_text(size = 14, hjust = 3, vjust = 3),
           legend.title = element_text(size = 15, face = "plain"),
@@ -110,7 +111,6 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
     return(plot)
 }
 
-mapa.funcao(shape_recife, demojovem_2000, demojovem_2000$pop_jovem, "Pop. de Jovens")
 
 
 
