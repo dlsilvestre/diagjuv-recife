@@ -418,6 +418,66 @@ EstMap <- mapa.funcao(shp_recife1, data = estupros_data_bairro,
 ggarrange(EstMap, Est_jovemMap, ncol = 2, common.legend = T, legend = "bottom")
 ggsave("Violencia/resultados/MAPA_ESTUPROS.png", width = 13, height = 7, units = "in")
 
+#====================================#
+#----- mapa jovens proporcional -----#
+
+# importar base
+demo_jovem_2010 <- read_csv("Demografia/resultados/demo_jovem_2010.csv")
+
+# manipular nome
+demo_jovem_2010$localidade <- toupper(demo_jovem_2010$localidade)
+demo_jovem_2010$localidade <- stri_trans_general(demo_jovem_2010$localidade , "Latin-ASCII")
+
+# criar variavel localidade como chr
+estupros_bairro_jovem$localidade <- as.character(estupros_bairro_jovem$Var1)
+
+# mergir dados
+estupros_bairro_jovem <- merge(estupros_bairro_jovem, demo_jovem_2010, by = "localidade", all = T)
+
+# transformar NA em 0 
+estupros_bairro_jovem$Freq[is.na(estupros_bairro_jovem$Freq)] <- 0
+
+# proporcional a pop de jovens
+estupros_bairro_jovem <- mutate(estupros_bairro_jovem, estupros_por_100_jovens = ((Freq / pop_jovem)*1000) )  
+
+# mapa
+Est_jovem_PropMap <- mapa.funcao(shp_recife1, data = estupros_bairro_jovem,
+                            variable = estupros_bairro_jovem$estupros_por_100_jovens, "" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
+                            pallete = "A")
+Est_jovem_PropMap
+ggsave("Violencia/resultados/MAPA_ESTUPROS_PROP.png", width = 8, height = 10, units = "in")
+
+#
+estupros_bairro_jovem[estupros_bairro_jovem$localidade == "JAQUEIRA",]
+
+#====================#
+
+# importar base
+demo_jovem_2010 <- read_csv("Demografia/resultados/demo_jovem_2010.csv")
+
+# manipular nome
+demo_jovem_2010$localidade <- toupper(demo_jovem_2010$localidade)
+demo_jovem_2010$localidade <- stri_trans_general(demo_jovem_2010$localidade , "Latin-ASCII")
+
+# criar variavel localidade como chr
+estupros_bairro_jovem$localidade <- as.character(estupros_bairro_jovem$Var1)
+
+# mergir dados
+estupros_bairro_jovem <- merge(estupros_bairro_jovem, demo_jovem_2010, by = "localidade", all = T)
+
+# transformar NA em 0 
+estupros_bairro_jovem$Freq[is.na(estupros_bairro_jovem$Freq)] <- 0
+
+# proporcional a pop de jovens
+estupros_bairro_jovem <- mutate(estupros_bairro_jovem, estupros_por_100_jovens = ((Freq / pop_jovem)*1000) )  
+
+# mapa
+Est_jovem_PropMap <- mapa.funcao(shp_recife1, data = estupros_bairro_jovem,
+                                 variable = estupros_bairro_jovem$estupros_por_100_jovens, "" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
+                                 pallete = "A")
+Est_jovem_PropMap
+ggsave("Violencia/resultados/MAPA_ESTUPROS_PROP.png", width = 8, height = 10, units = "in")
+
 #==========================#
 # Estupro por raca
 

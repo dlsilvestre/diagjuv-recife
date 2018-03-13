@@ -86,6 +86,8 @@ demojovem_data <-mutate(demojovem_data, prop_mulherj_jovemt =  round((pop_mulher
 demojovem_2000 <- demojovem_data[demojovem_data$Ano == 2000,]
 demojovem_2010 <- demojovem_data[demojovem_data$Ano == 2010,]
 
+write.csv(demojovem_2010, file = "Demografia/resultados/demo_jovem_2010.csv")
+
 #----------------------------------#
 # REGIOES POLITICO ADMINSTRATIVAS
 #----------------------------------#

@@ -73,8 +73,8 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
   shp_data$variavel[is.na(shp_data$variavel)] = 0
   shp_data = shp_data[order(shp_data$variavel),]
   shp_data$bairros_detasq = 1
-  shp_data$bairros_detasq[1:3] = ""
-  shp_data$bairros_detasq[c(length(shp_data)-2):c(length(shp_data))] = ""
+ # shp_data$bairros_detasq[1:4] = ""
+  shp_data$bairros_detasq[c(length(shp_data)-3):c(length(shp_data))] = ""
   
   shp_data$bairros_detasq = with(shp_data, paste0(shp_data$bairros_detasq, shp_data$EBAIRRNOME))
   shp_data$bairros_detasq_cod = grepl(shp_data$bairros_detasq, pattern = "1")
