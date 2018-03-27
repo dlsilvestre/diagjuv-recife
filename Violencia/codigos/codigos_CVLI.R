@@ -325,6 +325,7 @@ aggregate(jovem_cvli, by=list(Var1=apacc_voz$sexo), FUN=sum)
 # CVLI por LOGRADOURO [EXECUTAR EM MAQUINA COM BOM PROCESSAMENTO] 
 #================================================================#
 # checar merge dos bancos: perda de casos
+#************************************************************* CONSTRUCAO
 
 #----------------------#
 # manipular dados
@@ -348,20 +349,55 @@ data_json$logradouro_nome <- str_trim(data_json$logradouro_nome, "left")
 # mergir dados e geo
 data_json@data$id <- rownames(data_json@data)
 data_json@data   <- join(data_json@data, jovem_cvli_logd, by="logradouro_nome")
-data_json@data$Freq[is.na(data_json@data$Freq)] <- 0
-mapa.df     <- fortify(data_json)
-mapa.df     <- join(mapa.df, data_json@data, by="id")
+#data_json@data$Freq[is.na(data_json@data$Freq)] <- 0
+mapa.df <- fortify(data_json)
+mapa.df <- join(mapa.df, data_json@data, by="id")
 
 #------ CVLI por logradouro ------#
 ggplot(mapa.df, aes(x=long, y=lat, group=group))+
-  geom_line(aes(color= Freq))+
-  scale_color_viridis(name = "CVLI de Jovens",option= "A", direction = -1) +
+  geom_line(aes(color= Freq), alpha=0.1)+
+  geom_text(aes(label = ifelse(mapa.df$Freq>5, as.character(mapa.df$logradouro_nome),'')))+
+  scale_color_viridis(name = "CVLI de Jovens", option= "A", direction = -1, na.value = (alpha=0.1)) +
   coord_fixed()+
   theme_void()
   ggsave("CVLI_jovens_logradouroA.png", path = "Violencia/resultados",width = 14, height = 17, units = "in")
 
 # baixar o mapa de Recife
 mapImage <-get_map(c(lon =  -34.91, lat =-8.045), zoom = 12)
+
+#*********
+
+# tranformar shapefile em polygonsdataframe
+data_json_fort <- fortify(data_json, region = "logradouro_nome")
+localidade = data_json@data$EBAIRRNOME
+
+# extrair centroides dos poligonos
+require(reshape2)
+data_json@data$id <- rownames(data_json@data) 
+data_json<- melt(data_json)
+centroids.df = data.frame(coordinates(data_json))
+names(centroids.df) = c("Longitude", "Latitude")  #more sensible column localidades
+
+# base para plotagem
+variavel = data_json@data$Freq
+map_dataframe = data.frame(localidade, variavel, centroids.df)
+
+plot = ggplot(data = map_dataframe, aes(map_id = localidade)) + 
+  geom_map(aes(fill = data_json$Freq),colour = grey(0.96),  map = data_fortity) +
+  expand_limits(x = data_json_fort$long, y = data_json_fort$lat) +
+  scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
+  # scale_fill_gradient(name = legendtitle, low="lightgreen", high= "darkblue")+
+  geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 2.5, color = "black") +
+  labs(title = maintitle)+
+  coord_fixed(1) +
+  theme_nothing(legend = T)+
+  theme(legend.position="bottom",
+        legend.key.size = unit(0.7, "cm"),
+        legend.text = element_text(size = 14, hjust = 3, vjust = 3),
+        legend.title = element_text(size = 15, face = "plain"),
+        title = element_text(size = 15, face = "bold"))
+
+#*********
 
 #====== MAPA RECIFE + CVLI/LOGRADOUROS ======#
 ggmap(mapImage, extent = "normal", maprange = FALSE)+ 
