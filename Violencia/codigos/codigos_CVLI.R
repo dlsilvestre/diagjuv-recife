@@ -22,8 +22,8 @@
 library(readxl); library(stringr); library(dplyr); library(ggplot2); library(viridis); library(ggpubr)
 library(maps); library(mapdata); library(raster); library(ggmap); library(ggrepel); library(tidyr)
 library(purrr); library(OpenStreetMap); library(sp); library(maps); library(ggmap); library(readr)
-library(purrr); library(OpenStreetMap); library(sp); library(maps); library(ggmap)
-library(maptools)
+library(purrr); library(OpenStreetMap); library(sp); library(maps); library(ggmap); library(rgdal)
+library(maptools); library(plyr)
 
 # Tema para Graficos
 tema_massa <- function (base_size = 12, base_family = "") {
@@ -158,23 +158,14 @@ ggplot(data = mes, aes(x = datax, y = Freq, group = 1)) +
   labs(x = "", y= "Casos de CVLI de Jovens")+
   tema_massa() %+replace% 
   theme(axis.text.x = element_text(size=10,angle = 70,hjust=.5,vjust=.5,face="plain"))
-  labs(x = "", y= "Casos de CVLI")+
-  theme_minimal() %+replace% 
-  theme(axis.text.x = element_text(size=10,angle = 70,hjust=.5,vjust=.5,face="plain"),
-        axis.text.y = element_text(size=12,angle=0,hjust=1,vjust=0,face="plain"), 
-        axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
-        axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
-        title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
 ggsave("CVLI_jovens_mes.png", path = "Violencia/resultados", width = 8, height = 4, units = "in")
 
 #=========================================#
 # CVLI por bairro 
 #=========================================#
-?
-#------ Barra CVLI de Jovens do Total de CVLI de Jovens -------#
 
 #---- manipular variaveis ----#
-
+  
 # importar base pop jovem
 demo_jovem_2010 <- read_csv("Demografia/resultados/demo_jovem_2010.csv")
 
@@ -259,95 +250,35 @@ ggsave("CVLI_PropDeCVLI_Jov_Bairro.png", path = "Violencia/resultados", width = 
 #============================================#
 #  CVLI de Jovens do Total de CVLI 
 
-# contar e ordenar  
-cvli_bairro_jovem <- data.frame(table(cvli_jovem$BAIRRO))
-cvli_bairro_jovem$Var1 <- factor(cvli_bairro_jovem$Var1, levels = cvli_bairro_jovem$Var1[order(cvli_bairro_jovem$Freq)])
-
-# prop do total
-cvli_bairro_jovem <- mutate(cvli_bairro_jovem, prop = round(((Freq / sum(Freq))*100), 1))  
-cvli_bairro_jovem$prop2 <- paste(cvli_bairro_jovem$prop, "%", sep="")
-
-# grafico
-ggplot(data = cvli_bairro_jovem, aes(Var1, y = prop))+
-    geom_col(fill = "#7f0000")+
-    geom_text(aes(label = prop2), nudge_y = 0.32)+
-    labs(x = "", y = "Casos de CVLI de Jovens do Total")+
-    coord_flip()+
-    tema_massa()%+replace% 
-    theme(axis.text.x = element_text(size=10,hjust=.5,vjust=.5,face="plain"),
-          axis.text.y = element_text(size=11,angle=0,hjust=1,vjust=0,face="plain"), 
-          axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
-          axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
-          title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
-ggsave("CVLI_PropDoTotaldeJovens_barraBairro.png", path = "Violencia/resultados",width = 7, height = 12, units = "in")
-
-#------ Barra CVLI de Jovens do Total de CVLI -------#
-
-# contar   
-cvli_bair_jovTotal <- data.frame(table(cvli_data$BAIRRO, cvli_data$jovem))
-
-# criar prop de cvli de jovens do total de cvli
-cvli_bair_jovTotal <- mutate(cvli_bair_jovTotal, cvli_jovTotal = (`1` / (`0` + `1`))*100 )
-cvli_bair_jovTotal$cvli_jovTotal <- round(cvli_bair_jovTotal$cvli_jovTotal, 1)
+# criar prop do total de cvli
+cvli_bairro <- mutate(cvli_bairro, cvliJov_TotalCvli = round(((cvli_jovem / cvli_total)*100), 2))  
+cvli_bairro$cvliJov_TotalCvli[is.na(cvli_bairro$cvliJov_TotalCvli)] <- 0
+cvli_bairro$cvliJov_TotalCvli[is.nan(cvli_bairro$cvliJov_TotalCvli)] <- 0
+cvli_bairro$cvliJov_TotalCvli2 <- paste(cvli_bairro$cvliJov_TotalCvli, "%", sep="")
 
 # ordenar
-cvli_bair_jovTotal$Var1 <- factor(cvli_bair_jovTotal$Var1, levels = cvli_bair_jovTotal$Var1[order(cvli_bair_jovTotal$cvli_jovTotal)])
-
-# colar '%'
-cvli_bair_jovTotal$cvli_jovTotal_2 <- paste(cvli_bair_jovTotal$cvli_jovTotal, "%", sep="")
+cvli_bairro$localidade <- factor(cvli_bairro$localidade, levels = cvli_bairro$localidade[order(cvli_bairro$cvliJov_TotalCvli)])
 
 # grafico
-ggplot(data = cvli_bair_jovTotal, aes(Var1, y = cvli_jovTotal))+
-  geom_col(fill = "#7f0000")+
-  geom_text(aes(label = cvli_jovTotal_2), nudge_y = 4.25)+
-  labs(x = "", y = "Procent. de CVLI de Jovens do Total de CVLI")+
-  coord_flip()+
-  tema_massa()
-ggsave("CVLI_PropDeCVLI_barraBairro.png", path = "Violencia/resultados",width = 8, height = 12, units = "in")
+cvliJov_bair_TotalBar<- ggplot(data = cvli_bairro, aes(localidade, y = cvliJov_TotalCvli))+
+    geom_col(fill = "#7f0000")+
+    geom_text(aes(label = cvliJov_TotalCvli2), nudge_y = 4)+
+    labs(x = "", y = "Casos de CVLI de Jovens do Total")+
+    coord_flip()+
+    tema_massa()
+ggsave("CVLI_PropDoTotaldeJovens_barraBairro.png", cvliJov_bair_TotalBar, path = "Violencia/resultados",width = 7, height = 12, units = "in")
 
-# from wide to long 
-cvli_bair_jovTotal$Var2 <- as.character(cvli_bair_jovTotal$Var2)
-cvli_bair_jovTotal <- dcast(cvli_bair_jovTotal, Var1 ~ Var2, value.var="Freq")
+#---- Mapa (a partir de "funcoesgerais.R") ----#
+cvliJov_Totalmap <- mapa.funcao(shp_recife, cvli_bairro, cvli_bairro$cvliJov_TotalCvli, "" ,legendtitle = "Prop. de CVLI de Jovens \n      ", pallete = "A")
+ggsave("CVLI_PropDeJov_TotalcvliMapa.png", cvliJov_Totalmap, path = "Violencia/resultados",width = 8, height = 11, units = "in")
 
-# criar prop de cvli de jovens do total de cvli
-cvli_bair_jovTotal <- mutate(cvli_bair_jovTotal, cvli_jovTotal = )
+#---- Combinar ----#
+ggarrange(cvliJov_bair_TotalBar, cvliJov_Totalmap, ncol = 2, nrow = 1)
+ggsave("CVLI_PropDeJov_Totalcvli.png", path = "Violencia/resultados", width = 17, height = 13, units = "in")
 
-cvli_bairro_jovem$Var1 <- factor(cvli_bairro_jovem$Var1, levels = cvli_bairro_jovem$Var1[order(cvli_bairro_jovem$Freq)])
-
-# prop do total
-cvli_bairro_jovem <- mutate(cvli_bairro_jovem, prop = round(((Freq / sum(Freq))*100), 1))  
-cvli_bairro_jovem$prop2 <- paste(cvli_bairro_jovem$prop, "%", sep="")
-
-# grafico
-ggplot(data = cvli_bairro_jovem, aes(Var1, y = prop))+
-  geom_col(fill = "#7f0000")+
-  geom_text(aes(label = prop2), nudge_y = 0.32)+
-  labs(x = "", y = "Casos de CVLI de Jovens do Total")+
-  coord_flip()+
-  tema_massa()%+replace% 
-  theme(axis.text.x = element_text(size=10,hjust=.5,vjust=.5,face="plain"),
-        axis.text.y = element_text(size=11,angle=0,hjust=1,vjust=0,face="plain"), 
-        axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
-        axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
-        title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
-ggsave("CVLI_PropDoTotaldeJovens_barraBairro.png", path = "Violencia/resultados",width = 7, height = 12, units = "in")
-
-#===================#
-# Absoluto
-
-#---- total (2013-2017) ----#
-
-# contagem de mortes por bairro
-jovem_morte_bairro <- data.frame(table(jovem_cvli$BAIRRO))
-
-# criar variavel localidade como chr
-jovem_morte_bairro$localidade <- as.character(jovem_morte_bairro$Var1)
-
-#==== mapa (a partir de "funcoesgerais.R") ====#
-mapa.funcao(shp_recife1, jovem_morte_bairro, jovem_morte_bairro$Freq, "" ,legendtitle = "CVLI de Jovens \n    (2013-2017)", pallete = "A")
-ggsave("CVLI_jovens_bairro_mapa.png", path = "Violencia/resultados",width = 9, height = 11, units = "in")
-
-#---- por ano ----#
+#===========================#
+# MAPAS POR ANO
+#===========================#
 
 # contagem de mortes por bairro
 jovem_cvli_bairro_ano <- data.frame(table(jovem_cvli$BAIRRO, jovem_cvli$ANO))
@@ -356,30 +287,30 @@ jovem_cvli_bairro_ano <- data.frame(table(jovem_cvli$BAIRRO, jovem_cvli$ANO))
 jovem_cvli_bairro_ano$localidade <- as.character(jovem_cvli_bairro_ano$Var1)
 
 #==== mapa (a partir de "funcoesgerais.R") ====#
-
+# *diminuir tamanho da fonte em geom_label
 #---- 2013 ----#
-est_map_2013 <- mapa.funcao(shp_recife1, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2013,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2013], 
+est_map_2013 <- mapa.funcao(shp_recife, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2013,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2013], 
             "2013" , legendtitle = "CVLI Absoluta de Jovens" , pallete = "A")
 
 #---- 2014 ----#
-est_map_2014 <- mapa.funcao(shp_recife1, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2014,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2014], 
+est_map_2014 <- mapa.funcao(shp_recife, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2014,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2014], 
             "2014" , legendtitle = "CVLI Absoluta de Jovens", pallete = "A")
 
 #---- 2015 ----#
-est_map_2015 <- mapa.funcao(shp_recife1, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2015,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2015],
+est_map_2015 <- mapa.funcao(shp_recife, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2015,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2015],
             "2015" , legendtitle = "CVLI Absoluta de Jovens", pallete = "A")
 
 #---- 2016 ----#
-est_map_2016 <- mapa.funcao(shp_recife1, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2016,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2016],
+est_map_2016 <- mapa.funcao(shp_recife, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2016,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2016],
             "2016" , legendtitle = "CVLI Absoluta de Jovens",pallete = "A")
 
 #---- 2017 ----#
-est_map_2017 <- mapa.funcao(shp_recife1, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2017,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2017],
+est_map_2017 <- mapa.funcao(shp_recife, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2017,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2017],
             "2017" , legendtitle = "CVLI Absoluta de Jovens", pallete = "A")
 
 #---- combinar ----#
-est_map <- ggarrange(est_map_2013, est_map_2014, est_map_2015, est_map_2016, est_map_2017, ncol = 2, nrow = 3, common.legend = T, legend = "bottom")
-ggsave("Violencia/resultados/CVLI_MAP.png", width = 9, height = 12, units = "in")
+ggarrange(est_map_2013, est_map_2014, est_map_2015, est_map_2016, est_map_2017, ncol = 3, nrow = 2, common.legend = T, legend = "bottom")
+ggsave("Violencia/resultados/CVLI_ano_mapa.png", width = 16, height = 9, units = "in")
 
 #====================#
 # Raca
@@ -406,7 +337,7 @@ jovem_cvli_logd <- jovem_cvli_logd[order(jovem_cvli_logd$Freq, decreasing = T),]
 data_url <- "http://dados.recife.pe.gov.br/dataset/c1f100f0-f56f-4dd4-9dcc-1aa4da28798a/resource/18f16fda-32e2-4fe9-a5ab-0e7852258400/download/trechoslogradouros.geojson"
 data_file <- "trechoslogradouros.geojson"
 download.file(data_url, data_file)
-data_json <- geojson_read(data_file, what = "sp")
+data_json <- readOGR(data_file)
 
 # tratar nomes na base de dados p mergir
 jovem_cvli_logd$logradouro_nome <- jovem_cvli_logd$Var1
@@ -417,7 +348,7 @@ data_json$logradouro_nome <- str_trim(data_json$logradouro_nome, "left")
 # mergir dados e geo
 data_json@data$id <- rownames(data_json@data)
 data_json@data   <- join(data_json@data, jovem_cvli_logd, by="logradouro_nome")
-data_json@data$Freq[is.na(data_json@data$Freq)] <- 0.0001
+data_json@data$Freq[is.na(data_json@data$Freq)] <- 0
 mapa.df     <- fortify(data_json)
 mapa.df     <- join(mapa.df, data_json@data, by="id")
 
@@ -570,7 +501,7 @@ estupros_bairro_jovem$localidade <- as.character(estupros_bairro_jovem$Var1)
 estupros_bairro_jovem <- mutate(estupros_bairro_jovem, prop = (Freq / sum(Freq))*100)  
 
 # mapa
-Est_jovemMap <- mapa.funcao(shp_recife1, data = estupros_bairro_jovem,
+Est_jovemMap <- mapa.funcao(shp_recife, data = estupros_bairro_jovem,
              variable = estupros_bairro_jovem$Freq, "Estupros De Jovens" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
              pallete = "A")
 
@@ -586,7 +517,7 @@ estupros_data_bairro$localidade <- as.character(estupros_data_bairro$Var1)
 estupros_data_bairro <- mutate(estupros_data_bairro, prop = (Freq / sum(Freq))*100)  
 
 # mapa
-EstMap <- mapa.funcao(shp_recife1, data = estupros_data_bairro,
+EstMap <- mapa.funcao(shp_recife, data = estupros_data_bairro,
             variable = estupros_data_bairro$prop, "Estupros Totais" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
             pallete = "A")
 
@@ -617,7 +548,7 @@ estupros_bairro_jovem$Freq[is.na(estupros_bairro_jovem$Freq)] <- 0
 estupros_bairro_jovem <- mutate(estupros_bairro_jovem, estupros_por_100_jovens = ((Freq / pop_jovem)*1000) )  
 
 # mapa
-Est_jovem_PropMap <- mapa.funcao(shp_recife1, data = estupros_bairro_jovem,
+Est_jovem_PropMap <- mapa.funcao(shp_recife, data = estupros_bairro_jovem,
                             variable = estupros_bairro_jovem$estupros_por_100_jovens, "" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
                             pallete = "A")
 Est_jovem_PropMap
@@ -648,7 +579,7 @@ estupros_bairro_jovem$Freq[is.na(estupros_bairro_jovem$Freq)] <- 0
 estupros_bairro_jovem <- mutate(estupros_bairro_jovem, estupros_por_100_jovens = ((Freq / pop_jovem)*1000) )  
 
 # mapa
-Est_jovem_PropMap <- mapa.funcao(shp_recife1, data = estupros_bairro_jovem,
+Est_jovem_PropMap <- mapa.funcao(shp_recife, data = estupros_bairro_jovem,
                                  variable = estupros_bairro_jovem$estupros_por_100_jovens, "" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
                                  pallete = "A")
 Est_jovem_PropMap

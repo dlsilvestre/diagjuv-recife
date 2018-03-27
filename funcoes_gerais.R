@@ -73,7 +73,7 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
   shp_data = shp_data[order(shp_data$variavel),]
   shp_data$bairros_detasq = 1
  # shp_data$bairros_detasq[1:4] = ""
-  shp_data$bairros_detasq[c(length(shp_data)-3):c(length(shp_data))] = ""
+  shp_data$bairros_detasq[c(length(shp_data)-4):c(length(shp_data))] = ""
   
   shp_data$bairros_detasq = with(shp_data, paste0(shp_data$bairros_detasq, shp_data$EBAIRRNOME))
   shp_data$bairros_detasq_cod = grepl(shp_data$bairros_detasq, pattern = "1")
@@ -97,16 +97,12 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
     expand_limits(x = data_fortity$long, y = data_fortity$lat) +
     scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
   # scale_fill_gradient(name = legendtitle, low="lightgreen", high= "darkblue")+
-    geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 3, color = "black") +
+    geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 2.5, color = "black") +
     labs(title = maintitle)+
     coord_fixed(1) +
     theme_nothing(legend = T)+
-<<<<<<< HEAD
     theme(legend.position="bottom",
           legend.key.size = unit(0.7, "cm"),
-=======
-    theme(legend.key.size = unit(0.7, "cm"),
->>>>>>> 3a4b5b92e7a3b503175fce2638f983159b8771ad
           legend.text = element_text(size = 14, hjust = 3, vjust = 3),
           legend.title = element_text(size = 15, face = "plain"),
           title = element_text(size = 15, face = "bold"))
