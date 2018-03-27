@@ -101,8 +101,12 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
     labs(title = maintitle)+
     coord_fixed(1) +
     theme_nothing(legend = T)+
+<<<<<<< HEAD
     theme(legend.position="bottom",
           legend.key.size = unit(0.7, "cm"),
+=======
+    theme(legend.key.size = unit(0.7, "cm"),
+>>>>>>> 3a4b5b92e7a3b503175fce2638f983159b8771ad
           legend.text = element_text(size = 14, hjust = 3, vjust = 3),
           legend.title = element_text(size = 15, face = "plain"),
           title = element_text(size = 15, face = "bold"))

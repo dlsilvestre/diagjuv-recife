@@ -22,6 +22,7 @@
 library(readxl); library(stringr); library(dplyr); library(ggplot2); library(viridis); library(ggpubr)
 library(maps); library(mapdata); library(raster); library(ggmap); library(ggrepel); library(tidyr)
 library(purrr); library(OpenStreetMap); library(sp); library(maps); library(ggmap); library(readr)
+library(purrr); library(OpenStreetMap); library(sp); library(maps); library(ggmap)
 library(maptools)
 
 # Tema para Graficos
@@ -39,6 +40,7 @@ cvli_data <- read_excel("Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro
 
 # carregar shapefile 1 (completo)
 shp_recife <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
+
 
 #===============================#
 # Manipular base
@@ -110,6 +112,11 @@ cvli_data1 <- mutate(cvli_data1, mortesTotais_jovens = mortesTotais - mortesJove
 cvli_ano1 <- data.frame(cvli_data1[,c(1,3)], grupo = "CVLI de Jovens")
 cvli_ano2 <- data.frame(cvli_data1[,c(1,4)], grupo = "CVLI de Não-jovens")
 
+#---- manipular e mergir bases ----#
+x1 <- data.frame(cvli_data1[,c(1:2)], grupo = "CVLI Totais")
+x2 <- data.frame(cvli_data1[,c(1,3)], grupo = "CVLI de Jovens")
+x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "CVLI de Não-jovens")
+
 # renomear e combinar cvli
 colnames(cvli_ano1)[2] <- c("CVLI")
 colnames(cvli_ano2)[2] <- c("CVLI")
@@ -151,11 +158,20 @@ ggplot(data = mes, aes(x = datax, y = Freq, group = 1)) +
   labs(x = "", y= "Casos de CVLI de Jovens")+
   tema_massa() %+replace% 
   theme(axis.text.x = element_text(size=10,angle = 70,hjust=.5,vjust=.5,face="plain"))
+  labs(x = "", y= "Casos de CVLI")+
+  theme_minimal() %+replace% 
+  theme(axis.text.x = element_text(size=10,angle = 70,hjust=.5,vjust=.5,face="plain"),
+        axis.text.y = element_text(size=12,angle=0,hjust=1,vjust=0,face="plain"), 
+        axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
+        axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
+        title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
 ggsave("CVLI_jovens_mes.png", path = "Violencia/resultados", width = 8, height = 4, units = "in")
 
 #=========================================#
 # CVLI por bairro 
 #=========================================#
+?
+#------ Barra CVLI de Jovens do Total de CVLI de Jovens -------#
 
 #---- manipular variaveis ----#
 
@@ -243,6 +259,30 @@ ggsave("CVLI_PropDeCVLI_Jov_Bairro.png", path = "Violencia/resultados", width = 
 #============================================#
 #  CVLI de Jovens do Total de CVLI 
 
+# contar e ordenar  
+cvli_bairro_jovem <- data.frame(table(cvli_jovem$BAIRRO))
+cvli_bairro_jovem$Var1 <- factor(cvli_bairro_jovem$Var1, levels = cvli_bairro_jovem$Var1[order(cvli_bairro_jovem$Freq)])
+
+# prop do total
+cvli_bairro_jovem <- mutate(cvli_bairro_jovem, prop = round(((Freq / sum(Freq))*100), 1))  
+cvli_bairro_jovem$prop2 <- paste(cvli_bairro_jovem$prop, "%", sep="")
+
+# grafico
+ggplot(data = cvli_bairro_jovem, aes(Var1, y = prop))+
+    geom_col(fill = "#7f0000")+
+    geom_text(aes(label = prop2), nudge_y = 0.32)+
+    labs(x = "", y = "Casos de CVLI de Jovens do Total")+
+    coord_flip()+
+    tema_massa()%+replace% 
+    theme(axis.text.x = element_text(size=10,hjust=.5,vjust=.5,face="plain"),
+          axis.text.y = element_text(size=11,angle=0,hjust=1,vjust=0,face="plain"), 
+          axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
+          axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
+          title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
+ggsave("CVLI_PropDoTotaldeJovens_barraBairro.png", path = "Violencia/resultados",width = 7, height = 12, units = "in")
+
+#------ Barra CVLI de Jovens do Total de CVLI -------#
+
 # contar   
 cvli_bair_jovTotal <- data.frame(table(cvli_data$BAIRRO, cvli_data$jovem))
 
@@ -264,6 +304,33 @@ ggplot(data = cvli_bair_jovTotal, aes(Var1, y = cvli_jovTotal))+
   coord_flip()+
   tema_massa()
 ggsave("CVLI_PropDeCVLI_barraBairro.png", path = "Violencia/resultados",width = 8, height = 12, units = "in")
+
+# from wide to long 
+cvli_bair_jovTotal$Var2 <- as.character(cvli_bair_jovTotal$Var2)
+cvli_bair_jovTotal <- dcast(cvli_bair_jovTotal, Var1 ~ Var2, value.var="Freq")
+
+# criar prop de cvli de jovens do total de cvli
+cvli_bair_jovTotal <- mutate(cvli_bair_jovTotal, cvli_jovTotal = )
+
+cvli_bairro_jovem$Var1 <- factor(cvli_bairro_jovem$Var1, levels = cvli_bairro_jovem$Var1[order(cvli_bairro_jovem$Freq)])
+
+# prop do total
+cvli_bairro_jovem <- mutate(cvli_bairro_jovem, prop = round(((Freq / sum(Freq))*100), 1))  
+cvli_bairro_jovem$prop2 <- paste(cvli_bairro_jovem$prop, "%", sep="")
+
+# grafico
+ggplot(data = cvli_bairro_jovem, aes(Var1, y = prop))+
+  geom_col(fill = "#7f0000")+
+  geom_text(aes(label = prop2), nudge_y = 0.32)+
+  labs(x = "", y = "Casos de CVLI de Jovens do Total")+
+  coord_flip()+
+  tema_massa()%+replace% 
+  theme(axis.text.x = element_text(size=10,hjust=.5,vjust=.5,face="plain"),
+        axis.text.y = element_text(size=11,angle=0,hjust=1,vjust=0,face="plain"), 
+        axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
+        axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
+        title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
+ggsave("CVLI_PropDoTotaldeJovens_barraBairro.png", path = "Violencia/resultados",width = 7, height = 12, units = "in")
 
 #===================#
 # Absoluto
@@ -287,7 +354,6 @@ jovem_cvli_bairro_ano <- data.frame(table(jovem_cvli$BAIRRO, jovem_cvli$ANO))
 
 # criar variavel localidade como chr
 jovem_cvli_bairro_ano$localidade <- as.character(jovem_cvli_bairro_ano$Var1)
-
 
 #==== mapa (a partir de "funcoesgerais.R") ====#
 
