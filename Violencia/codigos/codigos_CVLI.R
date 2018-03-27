@@ -35,11 +35,7 @@ tema_massa <- function (base_size = 12, base_family = "") {
 }
 
 # carregar banco CVLI 2013-2017
-cvli_data <- read_excel("Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx", 
-                        col_types = c("text", "text", "text", 
-                                      "text", "text", "text", "text", "date", 
-                                      "text", "text", "text", "text"))
-  
+cvli_data <- read_excel("Documents/git_projects/diagjuv-recife/Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro, gÃªnero, cor da pele, idade, mÃªs - RECIFE - Jan2013 a Nov2017.xlsx")
 #===============================#
 # Manipular base
 
@@ -72,7 +68,7 @@ ggplot(data = cvli_data)+
   geom_bar(aes(x = cvli_data$IDADE), fill = "#333333")+
   geom_vline(xintercept = 15, size = 1, colour = "#FF3721",linetype = "dashed")+
   geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
-  labs(x = "Idade", y = "Frequênica de CVLI")+
+  labs(x = "Idade", y = "Frequ?nica de CVLI")+
   tema_massa()
 ggsave("mortes_por_idade.png", path = "Violencia/resultados",width = 8, height = 5, units = "in")
 
@@ -110,7 +106,7 @@ cvli_data1 <- mutate(cvli_data1, mortesTotais_jovens = mortesTotais - mortesJove
 #---- manipular e mergir bases ----#
 x1 <- data.frame(cvli_data1[,c(1:2)], grupo = "CVLI Totais")
 x2 <- data.frame(cvli_data1[,c(1,3)], grupo = "CVLI de Jovens")
-x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "CVLI de N?o-jovens")
+x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "CVLI de NÃ£o-jovens")
 
 colnames(x1)[2] <- c("CVLI")
 colnames(x2)[2] <- c("CVLI")
@@ -135,11 +131,11 @@ ggsave("mortes_total_jovens_tempo.png", path = "Violencia/resultados",
 # POR MES
 
 # ordernar meses
-cvli_data$MÊS <- factor(cvli_data$MÊS, levels = c("JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL",
+cvli_data$M?S <- factor(cvli_data$M?S, levels = c("JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL",
                                                    "AGO", "SET", "OUT", "NOV", "DEZ"))
 # ordenar anos
 cvli_data$ANO <- factor(cvli_data$ANO, levels = c("2013", "2014", "2015", "2016", "2017")) 
-mes <- data.frame(table(cvli_data$MÊS,cvli_data$ANO))
+mes <- data.frame(table(cvli_data$M?S,cvli_data$ANO))
 
 # 
 mes$data <-  with(mes, paste0(mes$Var1, "/",mes$Var2))
@@ -158,7 +154,6 @@ ggplot(data = mes, aes(x = datax, y = Freq, group = 1)) +
 # CVLI por bairro 
 #=========================================#
 
-  
   #------ Barra -------#
   
 cvli_bairro_jovem <- data.frame(table(cvli_jovem$BAIRRO))
@@ -268,7 +263,7 @@ ggmap(mapImage, extent = "normal", maprange = FALSE)+
 # contar e manipular
 cvli_raca_count <- data.frame(table(jovem_cvli$`COR DA PELE`, jovem_cvli$SEXO))
 cvli_raca_count$Var1 <- as.character(cvli_raca_count$Var1)
-cvli_raca_count$Var1[3] <- "Não Informada"
+cvli_raca_count$Var1[3] <- "N?o Informada"
 
 # proporcao
 cvli_raca_count <- mutate(cvli_raca_count, prop = round((Freq / sum(Freq)),2)*100)
@@ -316,7 +311,7 @@ ggsave("cvli_jovens_sexo.png", path = "Violencia/resultados",width = 7, height =
 #=============================#
 
 # carregar base
-estupros_data <- read_excel("Violencia/dados/Rel - 1023 - ESTUPRO - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx")
+estupros_data <- read_excel("Violencia/dados/Rel - 1023 - ESTUPRO - logradouros, bairro, g?nero, cor da pele, idade, m?s - RECIFE - Jan2013 a Nov2017.xlsx")
 
 #===============================#
 # Manipular base
@@ -348,7 +343,7 @@ ggplot(data = estupros_data)+
   geom_bar(aes(x = estupros_data$IDADE), fill = "#333333")+
   geom_vline(xintercept = 15, size = 1, colour = "#FF3721",linetype = "dashed")+
   geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
-  labs(x = "Idade", y = "Frequênica de Estupros")
+  labs(x = "Idade", y = "Frequ?nica de Estupros")
 ggsave("estupro_por_idade.png", path = "Violencia/resultados",width = 8, height = 5, units = "in")
 
 # porcentagem de cvli de jovens do total
@@ -486,8 +481,8 @@ est_raca_count <- data.frame(table(estupros_data$`COR DA PELE`))
 est_raca_count$Var1 <- as.character(est_raca_count$Var1)
 
 #est_raca_count <- est
-est_raca_count$Var1 <- c("Amarela","Branca", "Desconhecida/Não Informada", "Não Informada",
-                         "Negra", "Parda", "Indígena")
+est_raca_count$Var1 <- c("Amarela","Branca", "Desconhecida/N?o Informada", "N?o Informada",
+                         "Negra", "Parda", "Ind?gena")
 
 # proporcao
 est_raca_count <- mutate(est_raca_count, prop = round((Freq / sum(Freq)),2)*100)
