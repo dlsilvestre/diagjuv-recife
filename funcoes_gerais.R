@@ -44,7 +44,6 @@ variable = jovem_morte_bairro$Freq
 legendtitle = "CVLI Absoluta de Jovens \n     (2013-2017)"
 pallete = "A"
 
-
 # algoritmo
 mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) { 
   library(stringi); library(ggplot2)
@@ -94,14 +93,14 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
   map_dataframe = data.frame(localidade, variavel, centroids.df, nomes_centroides)
   
   plot = ggplot(data = map_dataframe, aes(map_id = localidade)) + 
-    geom_map(aes(fill = shp_data$variavel),colour = grey(0.85),  map = data_fortity) +
+    geom_map(aes(fill = shp_data$variavel),colour = grey(0.96),  map = data_fortity) +
     expand_limits(x = data_fortity$long, y = data_fortity$lat) +
     scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
   # scale_fill_gradient(name = legendtitle, low="lightgreen", high= "darkblue")+
-    geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 3.3, color = "black") +
+    geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 3, color = "black") +
     labs(title = maintitle)+
     coord_fixed(1) +
-    theme_nothing(legend = T)
+    theme_nothing(legend = T)+
     theme(legend.key.size = unit(0.7, "cm"),
           legend.text = element_text(size = 14, hjust = 3, vjust = 3),
           legend.title = element_text(size = 15, face = "plain"),
