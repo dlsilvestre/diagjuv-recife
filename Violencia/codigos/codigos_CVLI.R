@@ -19,10 +19,8 @@
 # install.packages(c("readxl", "stringr", "dplyr", "ggplot2", "geojsonio"))
 
 # carregar pacotes
-library(readxl); library(stringr); library(dplyr); library(ggplot2); library(viridis)
-library(maps); library(mapdata); library(raster); library(ggmap); library(ggrepel); 
-library(purrr); library(OpenStreetMap); library(sp); library(maps); library(ggmap)
-library(maptools)
+pacotes <- c("readxl", "stringr", "dplyr", "ggplot2", "viridis", "maps", "raster", "ggmap", "ggrepel", "sp", "maptools")
+lapply(pacotes, library, character.only = T)
 
 # Tema para Graficos
 tema_massa <- function (base_size = 12, base_family = "") {
@@ -34,128 +32,135 @@ tema_massa <- function (base_size = 12, base_family = "") {
           title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
 }
 
-# carregar banco CVLI 2013-2017
-cvli_data <- read_excel("Documents/git_projects/diagjuv-recife/Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro, gÃªnero, cor da pele, idade, mÃªs - RECIFE - Jan2013 a Nov2017.xlsx")
+# importar banco CVLI 2013-2017
+cvli_data <- read_excel("Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx")
+est_data <- read_excel("Violencia/dados/Rel - 1023 - ESTUPRO - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx")
+
 #===============================#
-# Manipular base
+# Manipular base 
 
-# remover linhas
-cvli_data <- cvli_data[-c(1:5, 2932:2942 ),-4]
+# selecionar linhas e colunas
+cvli_data <- cvli_data[-c(1:5, 2932:2942),-4] 
+est_data <- est_data[-c(1:5, 2303:2311 ),]
 
-# primeira linha do banco p colnames
-names <- c(cvli_data[1,])
+func.maniA <- function(data){
+    # remove linhas e colunas
+    # primeira linha do banco p colnames
+    names <- c(data[1,])
+    # retirar primeira linha 
+    data <-  data[-1, ]
+    # renomear colunas adequadamente
+    colnames(data) <- names
+    # jovem
+    data$IDADE <- as.numeric(data$IDADE)
+    data <- data[!is.na(data$IDADE),]
+    data <- mutate(data, jovem = ifelse(IDADE >= 15 & IDADE <=  29, 1, 0))
+    data_jovem <- data[data$jovem == 1,]
+return(list(data, data_jovem))
+}
 
-# retirar primeira linha 
-cvli_data <-  cvli_data[-1, ]
+# aplicar funcao
+cvli_mani <- func.maniA(cvli_data)
+est_mani <- func.maniA(est_data)
 
-# renomear colunas adequadamente
-colnames(cvli_data) <- str_replace(names, "NA", "DATA")
+# selecionar casos de jovens
+cvli_jovem <- data.frame(cvli_mani[2])
+est_jovem <- data.frame(est_mani[2])
 
-# jovem
-cvli_data$IDADE <- as.numeric(cvli_data$IDADE)
-cvli_data <- mutate(cvli_data, jovem = ifelse(IDADE >= 15 & IDADE <=  29, 1, 0))
-cvli_jovem <- cvli_data[cvli_data$jovem == 1,]
+# selecionar todos os casos
+cvli_mani <- data.frame(cvli_mani[1])
+est_mani <- data.frame(est_mani[1])
 
 #=========================#
-# CVLI por faixa etaria 
+# Faixa etaria 
 #=========================#
 
-# transformar em numerico
-cvli_data$IDADE <- as.numeric(cvli_data$IDADE)
+func.faixa <- function(data, var, nome){
+  #grafico
+  ret_plot = ggplot(data = data)+
+    geom_bar(aes(x = var), fill = "#333333")+
+    geom_vline(xintercept = 15, size = 1, colour = "#FF3721", linetype = "dashed")+
+    geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
+    labs(x = "Idade", y = paste("Frequência de", nome))+
+    scale_x_continuous(breaks = pretty(var, n = 25)) +
+    tema_massa()+
+    ggsave(paste0(nome, "_por_idade.png"), path = "Violencia/resultados",width = 9, height = 6, units = "in")
+  # porcentagem de jovens do total
+  pct = data.frame(table(var))
+  pct$var = as.numeric(as.character(pct$var))
+  pct = mutate(pct, jovens = ifelse(var >=15 & var <= 29, 1, 0))
+  pct = aggregate(pct$Freq, by = list(Category = pct$jovens), FUN=sum)
+  pct = c(pct[2,2] /  sum(pct[1,2] + pct[2,2] ))*100
+  pasteA = paste0(round(pct, 2),"% dos casos de ", nome, " são de jovens" ) 
+  return(list(ret_plot, pasteA))
+}
 
-# grafico
-ggplot(data = cvli_data)+
-  geom_bar(aes(x = cvli_data$IDADE), fill = "#333333")+
-  geom_vline(xintercept = 15, size = 1, colour = "#FF3721",linetype = "dashed")+
-  geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
-  labs(x = "Idade", y = "Frequ?nica de CVLI")+
-  tema_massa()
-ggsave("mortes_por_idade.png", path = "Violencia/resultados",width = 8, height = 5, units = "in")
-
-# porcentagem de cvli de jovens do total
-pct_cvli <-data.frame(table(cvli_data$IDADE))
-pct_cvli$Var1 <- as.numeric(as.character(pct_cvli$Var1))
-pct_cvli <- mutate(pct_cvli, jovens = ifelse(Var1 >=15 & Var1 <= 29, 1, 0))
-pct_cvli <- aggregate(pct_cvli$Freq, by=list(Category=pct_cvli$jovens), FUN=sum)
-
-# proporcao de 
-pct_cvli[2, 2] / pct_cvli[1,2]
-
+func.faixa(cvli_mani, cvli_mani$IDADE, "CVLI")
+func.faixa(est_mani, est_mani$IDADE, "Estupros")
 
 #=======================#
 # CVLI por ano 
 #=======================#
 
-#total
-ano_cvli_data <- data.frame(table(cvli_data$ANO))
+func.ano <- function(dataJovem, nome){
+  # contagem 
+  jovemAno <- data.frame(table(dataJovem$ANO, dataJovem$jovem))
+  # fator
+  jovemAno$jovem <- factor(jovemAno$Var2, levels = c("0", "1"), labels = c("Não-jovem", "Jovem"))
+  # grafico
+  ggplot(data = jovemAno) +
+    geom_line(aes(x = Var1, y = Freq, group = jovem, color = jovem, linetype = jovem), size = 1) + 
+    geom_label(aes(x = Var1, y = Freq, label = Freq))+
+    labs(x = "", y = paste("Casos", nome) )+
+    scale_linetype_manual("", values = c(1, 2)) +
+    scale_color_manual("", values=c("#E69F00", "#7f0000"))+
+    scale_y_continuous(limits = c(0,500))+
+    tema_massa()+
+    ggsave(paste0(nome, "_por_ano_Linha.png"), path = "Violencia/resultados",width = 9, height = 6, units = "in")
+}
 
-# selecionar jovens
-cvli_data$IDADE <- as.numeric(cvli_data$IDADE)
-jovem_cvli <- cvli_data[cvli_data$IDADE >= 15 & cvli_data$IDADE < 30 ,]
-
-# contagem por ano
-jv_ano_cvli_data <- data.frame(table(jovem_cvli$ANO))
-
-# juntar bases
-cvli_data1 <- data.frame(ano_cvli_data, jv_ano_cvli_data[,2])
-colnames(cvli_data1) <- c("Ano", "mortesTotais", "mortesJovens")
-
-# total -jovem
-cvli_data1 <- mutate(cvli_data1, mortesTotais_jovens = mortesTotais - mortesJovens)
-
-#---- manipular e mergir bases ----#
-x1 <- data.frame(cvli_data1[,c(1:2)], grupo = "CVLI Totais")
-x2 <- data.frame(cvli_data1[,c(1,3)], grupo = "CVLI de Jovens")
-x3 <- data.frame(cvli_data1[,c(1,4)], grupo = "CVLI de NÃ£o-jovens")
-
-colnames(x1)[2] <- c("CVLI")
-colnames(x2)[2] <- c("CVLI")
-colnames(x3)[2] <- c("CVLI")
-
-cvli_data2 <- rbind(x2, x3)
-
-# grafico
-ggplot(data = cvli_data2) +
-  geom_line(aes(x = Ano, y = CVLI, group = grupo, color = grupo), size = 1) + 
-  geom_label(aes(x = Ano, y = CVLI, label = CVLI))+
-  labs(x = "", y = "Casos CVLI")+
-  scale_color_manual(values=c("#7f0000", "#E69F00"))+
-  scale_y_continuous(limits = c(0,500))+
-  tema_massa()
-
-# salvar grafico
-ggsave("mortes_total_jovens_tempo.png", path = "Violencia/resultados",
-       width = 8, height = 4, units = "in")
+func.ano(cvli_mani, "CVLI")
+func.ano(est_mani, "Estupros")
 
 #=====================#
 # POR MES
 
-# ordernar meses
-cvli_data$M?S <- factor(cvli_data$M?S, levels = c("JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL",
-                                                   "AGO", "SET", "OUT", "NOV", "DEZ"))
-# ordenar anos
-cvli_data$ANO <- factor(cvli_data$ANO, levels = c("2013", "2014", "2015", "2016", "2017")) 
-mes <- data.frame(table(cvli_data$M?S,cvli_data$ANO))
+func.mes <- function(varMes, varAno, nome){
+  # ordernar meses e anos
+  if (nome == "Estupros"){
+    varMes <- factor(varMes, levels = c("JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"))
+  }
+  else {
+  varMes <- factor(varMes, levels = c("JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"))
+  }
+  # ordenar anos
+  varAno <- factor(varAno, levels = c("2013", "2014", "2015", "2016", "2017")) 
+  # juntar dados
+  dataMes <- data.frame(table(varMes, varAno))
+  # variavel MES/ANO
+  dataMes$date <-  with(dataMes, paste0(varMes, "/", varAno))
+  dataMes$date <- factor(dataMes$date, levels = dataMes$date)
+  #**Retirar Dezembro**
+  dataMes <- dataMes[dataMes$date != "DEZ/2017",]
+  # grafico
+  ggplot(data = dataMes, aes(x = date, y = Freq, group = 1)) +
+    geom_line(color = "#7f0000") +
+    stat_smooth(method = lm, color= "#E69F00", se = F)+
+    labs(x = "", y= paste("Casos de", nome))+
+    tema_massa()%+replace% 
+    theme(axis.text.x = element_text(size=10,angle = 60, hjust=.5,vjust=.5,face="plain")) +
+    ggsave(paste0(nome, "_jovensAno.png"), path = "Violencia/resultados", width = 8, height = 4, units = "in")
+}
 
-# 
-mes$data <-  with(mes, paste0(mes$Var1, "/",mes$Var2))
-mes$datax <- factor(mes$data, levels = mes$data)
-mes <- mes[-length(mes$Var1),]
-
-# grafico
-ggplot(data = mes, aes(x = datax, y = Freq, group = 1)) +
-  geom_line(color = "#7f0000") +
-  stat_smooth(method = lm, color= "#E69F00", se = F)+
-  labs(x = "", y= "Casos de CVLI")+
-  tema_massa()
-  ggsave("cvli_jovens.png", path = "Violencia/resultados", width = 8, height = 4, units = "in")
+func.mes(cvli_mani$MÊS, cvli_mani$ANO, "CVLI")
+func.mes(est_mani$MÊS, est_mani$ANO, "Estupros")
 
 #=========================================#
-# CVLI por bairro 
+# ANALISES DOS BAIRROS 
 #=========================================#
 
   #------ Barra -------#
-  
+
 cvli_bairro_jovem <- data.frame(table(cvli_jovem$BAIRRO))
 cvli_bairro_jovem$Var1 <- factor(cvli_bairro_jovem$Var1, 
                                        levels = cvli_bairro_jovem$Var1[order(cvli_bairro_jovem$Freq)])
@@ -178,8 +183,6 @@ cvli_bairro_jovem$Var1 <- factor(cvli_bairro_jovem$Var1,
   ggsave("mortes_por_bairro_BARRA_ABS.png", path = "Violencia/resultados",width = 4, height = 10, units = "in")
   
   
-  
-
 #===================#
 # Absoluto
 
