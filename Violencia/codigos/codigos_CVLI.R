@@ -19,15 +19,8 @@
 # install.packages(c("readxl", "stringr", "dplyr", "ggplot2", "geojsonio"))
 
 # carregar pacotes
-pacotes <- c("readxl", "stringr", "dplyr", "ggplot2", "viridis", "maps", "raster", "ggmap", "ggrepel", "sp", "maptools")
+pacotes <- c("readr","readxl", "stringr", "dplyr", "ggplot2", "viridis", "maps", "raster", "ggmap", "ggrepel", "sp", "maptools")
 lapply(pacotes, library, character.only = T)
-=======
-library(readxl); library(stringr); library(dplyr); library(ggplot2); library(viridis); library(ggpubr)
-library(maps); library(mapdata); library(raster); library(ggmap); library(ggrepel); library(tidyr)
-library(purrr); library(OpenStreetMap); library(sp); library(maps); library(ggmap); library(readr)
-library(purrr); library(OpenStreetMap); library(sp); library(maps); library(ggmap); library(rgdal)
-library(maptools); library(plyr)
->>>>>>> 6f284bba5975a8c392fb66836c003944bcb6710a
 
 # Tema para Graficos
 tema_massa <- function (base_size = 12, base_family = "") {
@@ -48,20 +41,21 @@ shp_recife <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
 
 #===============================#
 # Manipular base 
+#===============================#
 
 # selecionar linhas e colunas
 cvli_data <- cvli_data[-c(1:5, 2932:2942),-4] 
 est_data <- est_data[-c(1:5, 2303:2311 ),]
 
+# limpar base de dados
 func.maniA <- function(data){
-    # remove linhas e colunas
     # primeira linha do banco p colnames
     names <- c(data[1,])
     # retirar primeira linha 
     data <-  data[-1, ]
-    # renomear colunas adequadamente
+    # renomear colunas 
     colnames(data) <- names
-    # jovem
+    # criar var jovem
     data$IDADE <- as.numeric(data$IDADE)
     data <- data[!is.na(data$IDADE),]
     data <- mutate(data, jovem = ifelse(IDADE >= 15 & IDADE <=  29, 1, 0))
@@ -81,9 +75,9 @@ est_jovem <- data.frame(est_mani[2])
 cvli_mani <- data.frame(cvli_mani[1])
 est_mani <- data.frame(est_mani[1])
 
-#=========================#
-# Faixa etaria 
-#=========================#
+#===========================#
+# ANALISE FAIXA ETARIA
+#===========================#
 
 func.faixa <- function(data, var, nome){
   #grafico
@@ -109,8 +103,10 @@ func.faixa(cvli_mani, cvli_mani$IDADE, "CVLI")
 func.faixa(est_mani, est_mani$IDADE, "Estupros")
 
 #=======================#
-# CVLI por ano 
+# ANALISE TEMPORAL 
 #=======================#
+
+#===== Ano =====#
 
 func.ano <- function(dataJovem, nome){
   # contagem 
@@ -132,8 +128,7 @@ func.ano <- function(dataJovem, nome){
 func.ano(cvli_mani, "CVLI")
 func.ano(est_mani, "Estupros")
 
-#=====================#
-# POR MES
+#===== Mes =====#
 
 func.mes <- function(varMes, varAno, nome){
   # ordernar meses e anos
@@ -162,37 +157,65 @@ func.mes <- function(varMes, varAno, nome){
     ggsave(paste0(nome, "_jovensAno.png"), path = "Violencia/resultados", width = 8, height = 4, units = "in")
 }
 
+# executar funcao
 func.mes(cvli_mani$MÊS, cvli_mani$ANO, "CVLI")
 func.mes(est_mani$MÊS, est_mani$ANO, "Estupros")
+
+#=========================================#
+# SEXO / ANO 
+#=========================================#
+
+func.anoSexo <- function(dataJovem, nome){
+  # contagem 
+  jovemAno <- data.frame(table(dataJovem$ANO, dataJovem$SEXO))
+  if (nlevels(jovemAno$Var2) > 2){
+    jovemAno <- jovemAno[jovemAno$Var2 != "DESCONHECIDO",]
+  }
+
+  # grafico
+    ggplot(data = jovemAno) +
+    geom_line(aes(x = Var1, y = Freq, group = Var2, color = Var2, linetype = Var2), size = 1) + 
+    geom_label(aes(x = Var1, y = Freq, label = Freq))+
+    labs(x = "", y = paste("Casos", nome) )+
+    scale_linetype_manual("", values = c(1, 2)) +
+    scale_color_manual("", values=c("#E69F00", "#7f0000"))+
+    tema_massa()+
+    ggsave(paste0(nome, "_por_AnoSexo.png"), path = "Violencia/resultados",width = 9, height = 6, units = "in")
+}
+
+func.anoSexo(cvli_jovem, "CVLI")
+func.anoSexo(est_jovem, "Estupros")
+
+
 
 #=========================================#
 # ANALISES DOS BAIRROS 
 #=========================================#
 
-#---- manipular variaveis ----#
-  
-# importar base pop jovem
-demo_jovem_2010 <- read_csv("Demografia/resultados/demo_jovem_2010.csv")
+#===== manipular base =====#
 
-# mergir bases
-demo_jovem_2010$BAIRRO <- toupper(demo_jovem_2010$localidade)
-demo_jovem_2010$BAIRRO <- stri_trans_general(demo_jovem_2010$BAIRRO, "Latin-ASCII")
-cvli_data <- merge(demo_jovem_2010, cvli_data, by = "BAIRRO", all = T)
+#--- criar base de bairros ---#
+func.maniB <- function(dataJovem){
+  library(stringi)
+  library(reshape2)
+       # importar base pop jovem
+        dataDem <- read_csv("Demografia/resultados/demo_jovem_2010.csv")
+        # cvli jov e total por bairro
+        data_bairro <- data.frame(table(data$BAIRRO, data$jovem))
+        # from wide to long 
+        data_bairro <- dcast(data_bairro, Var1 ~ Var2, value.var="Freq")
+        # criar total de cvli por bairro
+        data_bairro <- mutate(data_bairro, total_cvli = `0` + `1`)
+        # renomear colunas
+        colnames(data_bairro) <- c("BAIRRO", "cvli_n_jovem", "cvli_jovem", "cvli_total")
+        # mergir co cvli_bairro_jovem
+        dataDem$BAIRRO <- toupper(dataDem$localidade)%>%
+                          stri_trans_general("Latin-ASCII")
+        data_bairro_out <- merge(dataDem, data_bairro, by = "BAIRRO", all = T)
+        return(data_bairro_out)
+}
 
-# cvli jov e total por bairro
-cvli_bairro <- data.frame(table(cvli_data$localidade, cvli_data$jovem))
-
-# from wide to long 
-cvli_bairro <- dcast(cvli_bairro, Var1 ~ Var2, value.var="Freq")
-
-# criar total de cvli por bairro
-cvli_bairro <- mutate(cvli_bairro, total_cvli = `0` + `1`)
-
-# renomear colunas
-colnames(cvli_bairro) <- c("localidade", "cvli_n_jovem", "cvli_jovem", "cvli_total")
-
-# mergir co cvli_bairro_jovem
-cvli_bairro <- merge(demo_jovem_2010, cvli_bairro, by = "localidade")
+# *** REVISAR CASOS EM DATA_BAIRRO_OUT
 
 #============================================#
 #  CVLI de Jovens prop a pop de jovens 
@@ -213,11 +236,9 @@ cvli_bair_jov1000bar <- ggplot(data = cvli_bairro, aes(localidade, y = cvliJov_p
   labs(x = "", y = "Prop. de CVLI de Jovens por 1000 jovens")+
   coord_flip()+
   tema_massa()
-ggsave("CVLI_PropDeCVLI_1000Jov_barraBairro.png",cvli_bair_jov1000bar,  path = "Violencia/resultados",width = 8, height = 12, units = "in")
 
 #---- Mapa (a partir de "funcoesgerais.R") ----#
 cvli_bair_jov1000map <- mapa.funcao(shp_recife, cvli_bairro, cvli_bairro$cvliJov_pop1000Jov, "" ,legendtitle = "Prop. de CVLI de Jovens \n      Por 1000 Jovens", pallete = "A")
-ggsave("CVLI_PropDeCVLI_1000Jov_mapaBairro.png", cvli_bair_jov1000map, path = "Violencia/resultados",width = 8, height = 11, units = "in")
 
 #---- Combinar ----#
 ggarrange(cvli_bair_jov1000bar, cvli_bair_jov1000map, ncol = 2, nrow = 1)
