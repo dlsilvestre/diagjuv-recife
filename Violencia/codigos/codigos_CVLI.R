@@ -146,7 +146,7 @@ func.mes <- function(varMes, varAno, nome){
   dataMes$date <-  with(dataMes, paste0(varMes, "/", varAno))
   dataMes$date <- factor(dataMes$date, levels = dataMes$date)
   #**Retirar Dezembro**
-  dataMes <- dataMes[dataMes$date != "DEZ/2017",]
+  dataMes <- dataMes[dataMes$date != "DEZ/2017" & dataMes$date != "DEZEMBRO/2017",]
   # grafico
   ggplot(data = dataMes, aes(x = date, y = Freq, group = 1)) +
     geom_line(color = "#7f0000") +
@@ -154,7 +154,7 @@ func.mes <- function(varMes, varAno, nome){
     labs(x = "", y= paste("Casos de", nome))+
     tema_massa()%+replace% 
     theme(axis.text.x = element_text(size=10,angle = 60, hjust=.5,vjust=.5,face="plain")) +
-    ggsave(paste0(nome, "_jovensAno.png"), path = "Violencia/resultados", width = 8, height = 4, units = "in")
+    ggsave(paste0(nome, "_jovensMes.png"), path = "Violencia/resultados", width = 8, height = 4, units = "in")
 }
 
 # executar funcao
@@ -179,8 +179,9 @@ func.anoSexo <- function(dataJovem, nome){
     labs(x = "", y = paste("Casos", nome) )+
     scale_linetype_manual("", values = c(1, 2)) +
     scale_color_manual("", values=c("#E69F00", "#7f0000"))+
-    tema_massa()+
-    ggsave(paste0(nome, "_por_AnoSexo.png"), path = "Violencia/resultados",width = 9, height = 6, units = "in")
+    tema_massa()%+replace%
+    theme(legend.position="bottom")+
+    ggsave(paste0(nome, "_por_AnoSexo.png"), path = "Violencia/resultados",width = 8, height = 4, units = "in")
 }
 
 func.anoSexo(cvli_jovem, "CVLI")
@@ -305,7 +306,7 @@ est_bairro <- func.maniB(est_mani)
 
 func.quadroA <- function(data, varJovem, info){
   library(ggpubr)
-# prop de cvli de jovens por 1000 jovens e arredondar
+# prop de jovens por 1000 jovens e arredondar
 data <- mutate(data, prop_pop_1000 =  ((varJovem / data$pop_jovem)*1000)/5)
 data$prop_pop_1000 <- round(data$prop_pop_1000, 2)
 # ordenar
@@ -314,7 +315,7 @@ data$localidade <- factor(data$localidade, levels = data$localidade[order(data$p
 jov1000bar <- ggplot(data = data, aes(localidade, y = prop_pop_1000))+
   geom_col(fill = "#7f0000")+
   geom_text(aes(label = prop_pop_1000), nudge_y = 1, size = 4)+
-  labs(x = "", y = "Prop. de CVLI de Jovens por 1000 jovens")+
+  labs(x = "", y = paste("Prop. de", info ,"de Jovens Por 1000 Jovens"))+
   coord_flip()+
   tema_massa()
 #---- Mapa ----#
@@ -325,37 +326,35 @@ return(jov1000)
 }
 
 func.quadroA(cvli_bairro, cvli_bairro$cvli_jovem, "CVLI")
-func.quadroA(cvli_bairro, cvli_bairro$cvli_jovem, "CVLI")
+func.quadroA(est_bairro, est_bairro$est_jovem, "Estupros")
 
 
 #============================================#
 # Prop de CVLI de Jovens por Bairro
-  
-#---- Barra ----#
 
-# prop do total
-cvli_bairro <- mutate(cvli_bairro,  cvliJovProp = round(((cvli_jovem / sum(cvli_jovem))*100), 1))  
-cvli_bairro$cvliJovProp2 <- paste(cvli_bairro$cvliJovProp, "%", sep="")
-
-# ordenar
-cvli_bairro$localidade <- factor(cvli_bairro$localidade, levels = cvli_bairro$localidade[order(cvli_bairro$cvliJovProp)])
-
-# grafico
-cvli_bair_jovBar <- ggplot(data = cvli_bairro, aes(localidade, y = cvliJovProp))+
+func.quadroB <- function(data, varJovem, info){
+  library(ggpubr)
+  # prop de jovens por bairro
+  data <- mutate(data,  JovProp = round(((varJovem / sum(varJovem))*100), 1))  
+  data$JovProp <- round(data$JovProp, 2)
+  # ordenar
+  data$localidade <- factor(data$localidade, levels = data$localidade[order(data$JovProp)])
+  # grafico
+  jovPropBar <- ggplot(data = data, aes(localidade, y = JovProp))+
     geom_col(fill = "#7f0000")+
-    geom_text(aes(label = cvliJovProp2), nudge_y = 0.32)+
-    labs(x = "", y = "Procent. de CVLI de Jovens por Bairro")+
+    geom_text(aes(label = JovProp), hjust = -1, size = 4)+
+    labs(x = "", y = paste("Porcent. de", info ,"de Jovens"))+
     coord_flip()+
     tema_massa()
-ggsave("CVLI_PropDeCVLI_Jov_barraBairro.png",cvli_bair_jov1000bar,  path = "Violencia/resultados",width = 8, height = 12, units = "in")
+  #---- Mapa ----#
+  jovPropMap <- mapa.funcao(shp_recife, data, data$JovProp, "" , legendtitle = paste("Porcent. de", info ,"de Jovens"), pallete = "A")
+  jovProp   <- ggarrange(jovPropBar, jovPropMap, ncol = 2, nrow = 1)
+  ggsave(paste0(info,"_jovPropQUADRO.png"), jovProp, path = "Violencia/resultados", width = 16, height = 13, units = "in")
+  return(jovProp)
+}
 
-#---- Mapa (a partir de "funcoesgerais.R") ----#
-cvli_bair_jovmap <- mapa.funcao(shp_recife, cvli_bairro, cvli_bairro$cvliJovProp, "" ,legendtitle = "Prop. de CVLI de Jovens \n           Por Bairro", pallete = "A")
-ggsave("CVLI_PropDeCVLI_Jov_mapaBairro.png", cvli_bair_jovmap, path = "Violencia/resultados",width = 8, height = 11, units = "in")
-
-#---- Combinar ----#
-ggarrange(cvli_bair_jovBar, cvli_bair_jovmap, ncol = 2, nrow = 1)
-ggsave("CVLI_PropDeCVLI_Jov_Bairro.png", path = "Violencia/resultados", width = 17, height = 13, units = "in")
+func.quadroB(cvli_bairro, cvli_bairro$cvli_jovem, "CVLI")
+func.quadroB(est_bairro, est_bairro$est_jovem, "Estupros")
 
 #============================================#
 #  CVLI de Jovens do Total de CVLI 
@@ -366,48 +365,62 @@ cvli_bairro$cvliJov_TotalCvli[is.na(cvli_bairro$cvliJov_TotalCvli)] <- 0
 cvli_bairro$cvliJov_TotalCvli[is.nan(cvli_bairro$cvliJov_TotalCvli)] <- 0
 cvli_bairro$cvliJov_TotalCvli2 <- paste(cvli_bairro$cvliJov_TotalCvli, "%", sep="")
 
-# ordenar
-cvli_bairro$localidade <- factor(cvli_bairro$localidade, levels = cvli_bairro$localidade[order(cvli_bairro$cvliJov_TotalCvli)])
-
-# grafico
-cvliJov_bair_TotalBar<- ggplot(data = cvli_bairro, aes(localidade, y = cvliJov_TotalCvli))+
+func.quadroC <- function(data, varJovem, varTotal, info){
+  library(ggpubr)
+  # prop de 'info' de jovens do total de 'info'
+  data <- mutate(data, propDoTotal = round(((varJovem / varTotal)*100), 2))  
+  data$propDoTotal[is.nan(data$propDoTotal)] <- 0
+  # ordenar
+  data$localidade <- factor(data$localidade, levels = data$localidade[order(data$propDoTotal)])
+  # grafico
+  jovPropDoTotalBar <- ggplot(data = data, aes(localidade, y = propDoTotal))+
     geom_col(fill = "#7f0000")+
-    geom_text(aes(label = cvliJov_TotalCvli2), nudge_y = 4)+
-    labs(x = "", y = "Casos de CVLI de Jovens do Total")+
+    geom_text(aes(label = propDoTotal), hjust = -0.1, size = 4)+
+    labs(x = "", y = paste("Porcent. de", info ,"de Jovens do Total de", info))+
     coord_flip()+
     tema_massa()
-ggsave("CVLI_PropDoTotaldeJovens_barraBairro.png", cvliJov_bair_TotalBar, path = "Violencia/resultados",width = 7, height = 12, units = "in")
+  #---- Mapa ----#
+  jovPropDoTotalMap <- mapa.funcao(shp_recife, data, data$propDoTotal, "" , legendtitle = paste("Porcent. de", info ,"de Jovens  \n      do Total de", info), pallete = "A")
+  jovPropDoTotal   <- ggarrange(jovPropDoTotalBar, jovPropDoTotalMap, ncol = 2, nrow = 1)
+  ggsave(paste0(info,"_jovPropDoTotalQUADRO.png"), jovPropDoTotal, path = "Violencia/resultados", width = 16, height = 13, units = "in")
+  return(jovPropDoTotal)
+}
 
-#---- Mapa (a partir de "funcoesgerais.R") ----#
-cvliJov_Totalmap <- mapa.funcao(shp_recife, cvli_bairro, cvli_bairro$cvliJov_TotalCvli, "" ,legendtitle = "Prop. de CVLI de Jovens \n      ", pallete = "A")
-ggsave("CVLI_PropDeJov_TotalcvliMapa.png", cvliJov_Totalmap, path = "Violencia/resultados",width = 8, height = 11, units = "in")
+func.quadroC(cvli_bairro, cvli_bairro$cvli_jovem, cvli_bairro$cvli_total, "CVLI")
+func.quadroC(est_bairro, est_bairro$est_jovem, est_bairro$est_total, "Estupros")
 
-#---- Combinar ----#
-ggarrange(cvliJov_bair_TotalBar, cvliJov_Totalmap, ncol = 2, nrow = 1)
-ggsave("CVLI_PropDeJov_Totalcvli.png", path = "Violencia/resultados", width = 17, height = 13, units = "in")
+#=========================================#
+# MAPAS POR ANO [EM CONSTRUCAO FUNCIONAL]
+#=======================================#
 
-#===========================#
-# MAPAS POR ANO
-#===========================#
+func.mapaAno <- function(data, varAno, varJovem, info){
+  ## MANIPULAR BAIRRO/ANO ##
+  
+  anos = c(2013:2017)
+  for (i in anos){
+    data = data[varAno == i,]
+    varJovem = varJovem[varAno == i]
+    mapa <- mapa.funcao(shp_recife, data, varJovem, paste(i) , legendtitle = paste(info, "de Jovens") , pallete = "A")
+    mapas = list(mapas, mapa)
+    
+    ggarrange(est_map_2013, est_map_2014, est_map_2015, est_map_2016, est_map_2017, ncol = 3, nrow = 2, common.legend = T, legend = "bottom")
+    ggsave("Violencia/resultados/CVLI_ano_mapa.png", width = 16, height = 9, units = "in")
+  }
+}
 
-# contagem de mortes por bairro
-jovem_cvli_bairro_ano <- data.frame(table(jovem_cvli$BAIRRO, jovem_cvli$ANO))
-
-# criar variavel localidade como chr
-jovem_cvli_bairro_ano$localidade <- as.character(jovem_cvli_bairro_ano$Var1)
-
-#==== mapa (a partir de "funcoesgerais.R") ====#
-# *diminuir tamanho da fonte em geom_label
+for (i in anos){
+  print(i)
+}
 #---- 2013 ----#
-est_map_2013 <- mapa.funcao(shp_recife, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2013,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2013], 
+est_map_2013 <- mapa.funcao(shp_recife, cvli_bairro[cvli_bairro$Ano == 2013,], cvli_bairro$cvli_jovem[cvli_bairro$Ano == 2013], 
             "2013" , legendtitle = "CVLI Absoluta de Jovens" , pallete = "A")
 
 #---- 2014 ----#
-est_map_2014 <- mapa.funcao(shp_recife, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2014,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2014], 
+est_map_2014 <- mapa.funcao(shp_recife, cvli_bairro[cvli_bairro$Ano == 2014,], cvli_bairro$Freq[cvli_bairro$Ano == 2014], 
             "2014" , legendtitle = "CVLI Absoluta de Jovens", pallete = "A")
 
 #---- 2015 ----#
-est_map_2015 <- mapa.funcao(shp_recife, jovem_cvli_bairro_ano[jovem_cvli_bairro_ano$Var2 == 2015,], jovem_cvli_bairro_ano$Freq[jovem_cvli_bairro_ano$Var2 == 2015],
+est_map_2015 <- mapa.funcao(shp_recife, cvli_bairro[cvli_bairro$Ano == 2015,], cvli_bairro$Freq[cvli_bairro$Ano == 2015],
             "2015" , legendtitle = "CVLI Absoluta de Jovens", pallete = "A")
 
 #---- 2016 ----#
@@ -423,13 +436,36 @@ ggarrange(est_map_2013, est_map_2014, est_map_2015, est_map_2016, est_map_2017, 
 ggsave("Violencia/resultados/CVLI_ano_mapa.png", width = 16, height = 9, units = "in")
 
 #====================#
-# Raca
+# Raca X Sexo
+#=====================#
 
+func.racaSexo <- function(data, info){
 # contagem
-bairro_cvli_raca <- data.frame(table(jovem_cvli$BAIRRO, jovem_cvli$`COR DA PELE`))
+raca_sex <- data.frame(table(data$COR.DA.PELE, data$SEXO))
+# manipulacao
+raca_sex$Var1 <- as.character(raca_sex$Var1)
+raca_sex$Var1[raca_sex$Var1 == "NAO INFORMADO"] <- "Não Informada"
+raca_sex <- raca_sex[raca_sex$Var2 != "DESCONHECIDO",]
+# proporcao
+raca_sex <- mutate(raca_sex, prop = round((Freq / sum(Freq)),3)*100)
+raca_sex$prop2 <- paste(raca_sex$prop, "%", sep="")
+# ordenar
+raca_sex$Var1  = factor(raca_sex$Var1 , levels = unique(raca_sex$Var1[order(raca_sex$Freq)]), ordered=TRUE)
+# plotar
+plotRacaSexo <- ggplot(data=raca_sex, aes(x=Var1, y=prop, fill=Var2)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label = ifelse(raca_sex$prop>0, as.character(raca_sex$prop2),'')), vjust = -0.5,size = 3.5,
+            position = position_dodge(width = 1))+
+  scale_fill_manual("Sexo", values=c("#E69F00", "#7f0000"))+
+  labs(x = "", y = paste("Porcentagem do Total de", info) )+
+  tema_massa()
+ggsave(paste0(info, "_plotRacaSexo.png"), plotRacaSexo, path = "Violencia/resultados", width = 7, height = 3, units = "in")
+return(plotRacaSexo)
+}
 
-#
-aggregate(jovem_cvli, by=list(Var1=apacc_voz$sexo), FUN=sum)
+func.racaSexo(cvli_jovem, "CVLI")
+func.racaSexo(est_jovem, "Estupros")
+
 
 #==================================================================#
 # CVLI por LOGRADOURO [EXECUTAR EM MAQUINA COM BOM PROCESSAMENTO] 
@@ -515,30 +551,6 @@ ggmap(mapImage, extent = "normal", maprange = FALSE)+
   ggsave("CVLI_jovens_logradouro1.png", path = "Violencia/resultados",width = 14, height = 17, units = "in")
 
 #==========================#
-# CVLI por raca 
-
-# contar e manipular
-cvli_raca_count <- data.frame(table(jovem_cvli$`COR DA PELE`, jovem_cvli$SEXO))
-cvli_raca_count$Var1 <- as.character(cvli_raca_count$Var1)
-cvli_raca_count$Var1[3] <- "N?o Informada"
-
-# proporcao
-cvli_raca_count <- mutate(cvli_raca_count, prop = round((Freq / sum(Freq)),2)*100)
-cvli_raca_count$prop <- paste(cvli_raca_count$prop, "%", sep="")
-
-# ordenar
-cvli_raca_count$Var1 <- factor(cvli_raca_count$Var1, 
-                                      levels = cvli_raca_count$Var1[order(cvli_raca_count$Freq)])
-
-# plotar
-ggplot(cvli_raca_count, aes(x = Var1, y = Freq))+
-  geom_col(fill = "#333333")+
-  geom_label(aes(label = prop), size = 3.2)+
-  labs(x ="", y = "Porcent. de Representantes") +
-  coord_flip()
-#ggsave("cvli_jovens_RACA.png", path = "Violencia/resultados",width = 7, height = 3, units = "in")
-
-#==========================#
 # CVLI por sexo 
 
 # contar e manipular
@@ -562,204 +574,6 @@ ggplot(cvli_sex_count, aes(x = Var1, y = Freq))+
   coord_flip()+
   tema_massa()
 ggsave("cvli_jovens_sexo.png", path = "Violencia/resultados",width = 7, height = 2, units = "in")
-
-#=============================#
-# CASOS ESTUPRO               #
-#=============================#
-
-# carregar base
-estupros_data <- read_excel("Violencia/dados/Rel - 1023 - ESTUPRO - logradouros, bairro, g?nero, cor da pele, idade, m?s - RECIFE - Jan2013 a Nov2017.xlsx")
-
-#===============================#
-# Manipular base
-
-# remover linhas
-estupros_data <- estupros_data[-c(1:5, 2303:2311 ),]
-
-# primeira linha do banco p colnames
-names_est <- c(estupros_data[1,])
-
-# retirar primeira linha
-estupros_data <-  estupros_data[-1,]
-
-# renomear colunas adequadamente
-colnames(estupros_data) <- str_replace(names_est, "NA", "DATA")
-
-# jovens
-estupros_data <- mutate(estupros_data, jovem = ifelse(IDADE >= 15 & IDADE <= 29, 1, 0))
-estupros_data_jovem <- estupros_data_jovem[estupros_data$jovem ==1, ]
-
-#============================#
-# Estupros por faixa-etaria
-
-# transformar em numerico
-estupros_data$IDADE <- as.numeric(estupros_data$IDADE)
-
-# grafico
-ggplot(data = estupros_data)+
-  geom_bar(aes(x = estupros_data$IDADE), fill = "#333333")+
-  geom_vline(xintercept = 15, size = 1, colour = "#FF3721",linetype = "dashed")+
-  geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
-  labs(x = "Idade", y = "Frequ?nica de Estupros")
-ggsave("estupro_por_idade.png", path = "Violencia/resultados",width = 8, height = 5, units = "in")
-
-# porcentagem de cvli de jovens do total
-pct_est <-data.frame(table(estupros_data$IDADE))
-pct_est$Var1 <- as.numeric(as.character(pct_est$Var1))
-pct_est <- mutate(pct_est, jovens = ifelse(Var1 < 15, 1, 0))
-pct_est <- aggregate(pct_est$Freq, by=list(Category=pct_est$jovens), FUN=sum)
-
-# proporcao de 
-pct_est[2, 2] / pct_est[1,2] 
-
-#=============================#
-# Estupros por bairro
-
-#------ Barra -------#
-estupros_bairro_jovem <- data.frame(table(estupros_data_jovem$BAIRRO))
-estupros_bairro_jovem$Var1 <- factor(estupros_bairro_jovem$Var1, 
-                              levels = estupros_bairro_jovem$Var1[order(estupros_bairro_jovem$Freq)])
-
-estupros_bairro_jovem <- mutate(estupros_bairro_jovem, prop = round(((Freq / sum(Freq))*100), 1))  
-estupros_bairro_jovem$prop2 <- paste(estupros_bairro_jovem$prop, "%", sep="")
-
-ggplot(data = estupros_bairro_jovem, aes(Var1, y = prop))+
-  geom_col(fill = "#FF872F")+
-  geom_text(aes(label = prop2))+
-  labs(x = "", y = "Casos de Estupros Jovens do Total")+
-  coord_flip()+
-  tema_massa()%+replace% 
-  theme(axis.text.x = element_text(size=10,hjust=.5,vjust=.5,face="plain"),
-        axis.text.y = element_text(size=9,angle=0,hjust=1,vjust=0,face="plain"), 
-        axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
-        axis.title.y = element_text(colour="black",size=12,angle=90,hjust=0.5,vjust=0.6,face="plain"),
-        title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
-
-ggsave("estupros_por_bairro_BARRA_ABS.png", path = "Violencia/resultados",width = 4, height = 10, units = "in")
-
-#----- mapa jovens -----#
-
-# criar variavel localidade como chr
-estupros_bairro_jovem$localidade <- as.character(estupros_bairro_jovem$Var1)
-
-# proporcional
-estupros_bairro_jovem <- mutate(estupros_bairro_jovem, prop = (Freq / sum(Freq))*100)  
-
-# mapa
-Est_jovemMap <- mapa.funcao(shp_recife, data = estupros_bairro_jovem,
-             variable = estupros_bairro_jovem$Freq, "Estupros De Jovens" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
-             pallete = "A")
-
-#------ Mapa total  ------#
-
-# contagem 
-estupros_data_bairro <- data.frame(table(estupros_data$BAIRRO))
-
-# criar variavel localidade como chr
-estupros_data_bairro$localidade <- as.character(estupros_data_bairro$Var1)
-
-# proporcional
-estupros_data_bairro <- mutate(estupros_data_bairro, prop = (Freq / sum(Freq))*100)  
-
-# mapa
-EstMap <- mapa.funcao(shp_recife, data = estupros_data_bairro,
-            variable = estupros_data_bairro$prop, "Estupros Totais" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
-            pallete = "A")
-
-#----- combinar -----#
-ggarrange(EstMap, Est_jovemMap, ncol = 2, common.legend = T, legend = "bottom")
-ggsave("Violencia/resultados/MAPA_ESTUPROS.png", width = 13, height = 7, units = "in")
-
-#====================================#
-#----- mapa jovens proporcional -----#
-
-# importar base
-demo_jovem_2010 <- read_csv("Demografia/resultados/demo_jovem_2010.csv")
-
-# manipular nome
-demo_jovem_2010$localidade <- toupper(demo_jovem_2010$localidade)
-demo_jovem_2010$localidade <- stri_trans_general(demo_jovem_2010$localidade , "Latin-ASCII")
-
-# criar variavel localidade como chr
-estupros_bairro_jovem$localidade <- as.character(estupros_bairro_jovem$Var1)
-
-# mergir dados
-estupros_bairro_jovem <- merge(estupros_bairro_jovem, demo_jovem_2010, by = "localidade", all = T)
-
-# transformar NA em 0 
-estupros_bairro_jovem$Freq[is.na(estupros_bairro_jovem$Freq)] <- 0
-
-# proporcional a pop de jovens
-estupros_bairro_jovem <- mutate(estupros_bairro_jovem, estupros_por_100_jovens = ((Freq / pop_jovem)*1000) )  
-
-# mapa
-Est_jovem_PropMap <- mapa.funcao(shp_recife, data = estupros_bairro_jovem,
-                            variable = estupros_bairro_jovem$estupros_por_100_jovens, "" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
-                            pallete = "A")
-Est_jovem_PropMap
-ggsave("Violencia/resultados/MAPA_ESTUPROS_PROP.png", width = 8, height = 10, units = "in")
-
-#
-estupros_bairro_jovem[estupros_bairro_jovem$localidade == "JAQUEIRA",]
-
-#====================#
-
-# importar base
-demo_jovem_2010 <- read_csv("Demografia/resultados/demo_jovem_2010.csv")
-
-# manipular nome
-demo_jovem_2010$localidade <- toupper(demo_jovem_2010$localidade)
-demo_jovem_2010$localidade <- stri_trans_general(demo_jovem_2010$localidade , "Latin-ASCII")
-
-# criar variavel localidade como chr
-estupros_bairro_jovem$localidade <- as.character(estupros_bairro_jovem$Var1)
-
-# mergir dados
-estupros_bairro_jovem <- merge(estupros_bairro_jovem, demo_jovem_2010, by = "localidade", all = T)
-
-# transformar NA em 0 
-estupros_bairro_jovem$Freq[is.na(estupros_bairro_jovem$Freq)] <- 0
-
-# proporcional a pop de jovens
-estupros_bairro_jovem <- mutate(estupros_bairro_jovem, estupros_por_100_jovens = ((Freq / pop_jovem)*1000) )  
-
-# mapa
-Est_jovem_PropMap <- mapa.funcao(shp_recife, data = estupros_bairro_jovem,
-                                 variable = estupros_bairro_jovem$estupros_por_100_jovens, "" ,legendtitle = "Casos de Estupro \n    (2013-2017)",
-                                 pallete = "A")
-Est_jovem_PropMap
-ggsave("Violencia/resultados/MAPA_ESTUPROS_PROP.png", width = 8, height = 10, units = "in")
-
-#==========================#
-# Estupro por raca
-
-# contar e manipular
-est_raca_count <- data.frame(table(estupros_data$`COR DA PELE`))
-est_raca_count$Var1 <- as.character(est_raca_count$Var1)
-
-#est_raca_count <- est
-est_raca_count$Var1 <- c("Amarela","Branca", "Desconhecida/N?o Informada", "N?o Informada",
-                         "Negra", "Parda", "Ind?gena")
-
-# proporcao
-est_raca_count <- mutate(est_raca_count, prop = round((Freq / sum(Freq)),2)*100)
-est_raca_count$prop <- paste(est_raca_count$prop, "%", sep="")
-
-# ordenar
-est_raca_count <- est_raca_count[-4,]
-est_raca_count$Var1 <- factor(est_raca_count$Var1, 
-                               levels = est_raca_count$Var1[order(est_raca_count$Freq)])
-
-# plotar
-ggplot(est_raca_count, aes(x = Var1, y = Freq))+
-  geom_col(fill = "#333333")+
-  geom_label(aes(label = prop), size = 3.5)+
-  labs(x ="", y = "Porcent. do Total de Estupros") +
-  coord_flip()+
-  tema_massa()
-ggsave("cvli_jovens_RACA.png", path = "Violencia/resultados",width = 8, height = 3, units = "in")
-
-#========================#
 
 
 
