@@ -186,16 +186,89 @@ func.anoSexo <- function(dataJovem, nome){
 func.anoSexo(cvli_jovem, "CVLI")
 func.anoSexo(est_jovem, "Estupros")
 
-
-
 #=========================================#
 # ANALISES DOS BAIRROS 
 #=========================================#
 
+#===== Funcao p/ Mapa =====#
+mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) { 
+  library(stringi); library(ggplot2)
+  # function to create merge string based on similarity
+  best_match= function(string_vector,string_replacement){
+    s<-string_replacement %>% 
+      purrr::map_int(~{
+        .x %>% 
+          RecordLinkage::levenshteinSim(string_vector) %>%
+          match(max(.),.)
+      })
+    string_vector[s] = string_replacement
+    return(string_vector)
+  }
+  # manipulate string for merge
+  data$EBAIRRNOME = data$localidade
+  data$EBAIRRNOME = toupper(data$EBAIRRNOME)
+  data$EBAIRRNOME = stri_trans_general(data$EBAIRRNOME , "Latin-ASCII")
+  data$EBAIRRNOME = best_match(data$EBAIRRNOME, shape$EBAIRRNOME)
+  data$variavel   = variable
+  
+  # merge data with shapefile
+  shp_data <- merge(shape, data, by = "EBAIRRNOME", all = T)
+  
+  # definir labels no mapa (3 maiores, 3 menores)
+  shp_data$variavel[is.na(shp_data$variavel)] = 0
+  shp_data = shp_data[order(shp_data$variavel),]
+  shp_data$bairros_detasq = 1
+  # shp_data$bairros_detasq[1:4] = ""
+  shp_data$bairros_detasq[c(length(shp_data)-4):c(length(shp_data))] = ""
+  shp_data$bairros_detasq = with(shp_data, paste0(shp_data$bairros_detasq, shp_data$EBAIRRNOME))
+  shp_data$bairros_detasq_cod = grepl(shp_data$bairros_detasq, pattern = "1")
+  shp_data$bairros_detasq[shp_data$bairros_detasq_cod == TRUE ] = ""
+  
+  # tranformar shapefile em polygonsdataframe
+  data_fortity = fortify(shp_data, region = "EBAIRRNOME")
+  localidade = shp_data@data$EBAIRRNOME
+  # extrair centroides dos poligonos
+  centroids.df = as.data.frame(coordinates(shp_data))
+  names(centroids.df) = c("Longitude", "Latitude")  #more sensible column localidades
+  # base para plotagem
+  variavel = shp_data@data$variavel
+  nomes_centroides = shp_data$bairros_detasq
+  map_dataframe = data.frame(localidade, variavel, centroids.df, nomes_centroides)
+  
+  plot = ggplot(data = map_dataframe, aes(map_id = localidade)) + 
+    geom_map(aes(fill = shp_data$variavel),colour = grey(0.96),  map = data_fortity) +
+    expand_limits(x = data_fortity$long, y = data_fortity$lat) +
+    scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
+    # scale_fill_gradient(name = legendtitle, low="lightgreen", high= "darkblue")+
+    geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 4.5, color = "black") +
+    labs(title = maintitle)+
+    coord_fixed(1) +
+    theme_nothing(legend = T)+
+    theme(legend.position="bottom",
+          legend.key.size = unit(0.7, "cm"),
+          legend.text = element_text(size = 14, hjust = 3, vjust = 3),
+          legend.title = element_text(size = 15, face = "plain"),
+          title = element_text(size = 15, face = "bold"))
+  
+  return(plot)
+}
+
 #===== manipular base =====#
 
+best_match= function(string_vector,string_replacement){
+  s<-string_replacement %>% 
+    purrr::map_int(~{
+      .x %>% 
+        RecordLinkage::levenshteinSim(string_vector) %>%
+        match(max(.),.)
+    })
+  string_vector[s] = string_replacement
+  return(string_vector)
+}
+
+
 #--- criar base de bairros ---#
-func.maniB <- function(dataJovem){
+func.maniB <- function(data){
   library(stringi)
   library(reshape2)
        # importar base pop jovem
@@ -207,42 +280,53 @@ func.maniB <- function(dataJovem){
         # criar total de cvli por bairro
         data_bairro <- mutate(data_bairro, total_cvli = `0` + `1`)
         # renomear colunas
-        colnames(data_bairro) <- c("BAIRRO", "cvli_n_jovem", "cvli_jovem", "cvli_total")
+        if (length(data) == 12){
+          colnames(data_bairro) <- c("BAIRRO", "cvli_nao_jovem", "cvli_jovem", "cvli_total")
+        }     else{
+          colnames(data_bairro) <- c("BAIRRO", "est_nao_jovem", "est_jovem", "est_total")
+          }
         # mergir co cvli_bairro_jovem
         dataDem$BAIRRO <- toupper(dataDem$localidade)%>%
                           stri_trans_general("Latin-ASCII")
+        data_bairro$BAIRRO <- best_match(as.character(data_bairro$BAIRRO), dataDem$BAIRRO)
         data_bairro_out <- merge(dataDem, data_bairro, by = "BAIRRO", all = T)
+        # manipular missing cases
+        data_bairro_out <- data_bairro_out[!is.na(data_bairro_out$localidade),]
+        data_bairro_out[is.na(data_bairro_out)] <- 0
         return(data_bairro_out)
 }
 
-# *** REVISAR CASOS EM DATA_BAIRRO_OUT
+# executar funcoes 
+cvli_bairro <- func.maniB(cvli_mani)
+est_bairro <- func.maniB(est_mani)
 
 #============================================#
-#  CVLI de Jovens prop a pop de jovens 
+#  CVLI de Jovens prop a pop de jovens por ano
 
-#---- Barra ----#
-
-# prop de cvli de jovens por 1000 jovens
-cvli_bairro <- mutate(cvli_bairro, cvliJov_pop1000Jov =  ((cvli_bairro$cvli_jovem / cvli_bairro$pop_jovem)*1000)/5 )
-cvli_bairro$cvliJov_pop1000Jov <- round(cvli_bairro$cvliJov_pop1000Jov, 2)
-
+func.quadroA <- function(data, varJovem, info){
+  library(ggpubr)
+# prop de cvli de jovens por 1000 jovens e arredondar
+data <- mutate(data, prop_pop_1000 =  ((varJovem / data$pop_jovem)*1000)/5)
+data$prop_pop_1000 <- round(data$prop_pop_1000, 2)
 # ordenar
-cvli_bairro$localidade <- factor(cvli_bairro$localidade, levels = cvli_bairro$localidade[order(cvli_bairro$cvliJov_pop1000Jov)])
-
+data$localidade <- factor(data$localidade, levels = data$localidade[order(data$prop_pop_1000)])
 # grafico
-cvli_bair_jov1000bar <- ggplot(data = cvli_bairro, aes(localidade, y = cvliJov_pop1000Jov))+
+jov1000bar <- ggplot(data = data, aes(localidade, y = prop_pop_1000))+
   geom_col(fill = "#7f0000")+
-  geom_text(aes(label = cvliJov_pop1000Jov), nudge_y = 1, size = 4)+
+  geom_text(aes(label = prop_pop_1000), nudge_y = 1, size = 4)+
   labs(x = "", y = "Prop. de CVLI de Jovens por 1000 jovens")+
   coord_flip()+
   tema_massa()
+#---- Mapa ----#
+jov1000map <- mapa.funcao(shp_recife, data, data$prop_pop_1000, "" , legendtitle = paste("Prop. de", info ,"de Jovens \n      Por 1000 Jovens"), pallete = "A")
+jov1000   <- ggarrange(jov1000bar, jov1000map, ncol = 2, nrow = 1)
+ggsave(paste0(info,"_1000JovQUADRO.png"), jov1000, path = "Violencia/resultados", width = 17, height = 13, units = "in")
+return(jov1000)
+}
 
-#---- Mapa (a partir de "funcoesgerais.R") ----#
-cvli_bair_jov1000map <- mapa.funcao(shp_recife, cvli_bairro, cvli_bairro$cvliJov_pop1000Jov, "" ,legendtitle = "Prop. de CVLI de Jovens \n      Por 1000 Jovens", pallete = "A")
+func.quadroA(cvli_bairro, cvli_bairro$cvli_jovem, "CVLI")
+func.quadroA(cvli_bairro, cvli_bairro$cvli_jovem, "CVLI")
 
-#---- Combinar ----#
-ggarrange(cvli_bair_jov1000bar, cvli_bair_jov1000map, ncol = 2, nrow = 1)
-ggsave("CVLI_PropDeCVLI_1000Jov_Bairro.png", path = "Violencia/resultados", width = 17, height = 13, units = "in")
 
 #============================================#
 # Prop de CVLI de Jovens por Bairro
