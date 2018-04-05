@@ -405,7 +405,7 @@ func.quadroB <- function(data, varJovem, info){
   # grafico
   jovPropBar <- ggplot(data = data, aes(localidade, y = JovProp))+
     geom_col(fill = "#7f0000")+
-    geom_text(aes(label = JovProp), hjust = -1, size = 4)+
+    geom_text(aes(label = JovProp), hjust = -0.2, size = 4)+
     labs(x = "", y = paste("Porcent. de", info ,"de Jovens"))+
     coord_flip()+
     tema_massa()
