@@ -16,10 +16,10 @@
 #----------------------------------------------------#
 
 # instalar pacotes
-# install.packages(c("readxl", "stringr", "dplyr", "ggplot2", "geojsonio"))
+# install.packages(c("qdap","readr","readxl", "stringr", "dplyr", "ggplot2", "viridis", "maps", "raster", "ggmap", "ggrepel", "sp", "maptools"))
 
 # carregar pacotes
-pacotes <- c("qdap","readr","readxl", "stringr", "dplyr", "ggplot2", "viridis", "maps", "raster", "ggmap", "ggrepel", "sp", "maptools")
+pacotes <- c("ggrepel","qdap","readr","readxl", "stringr", "dplyr", "ggplot2", "viridis", "maps", "raster", "ggmap", "ggrepel", "sp", "maptools")
 lapply(pacotes, library, character.only = T)
 
 # Tema para Graficos
@@ -32,7 +32,7 @@ tema_massa <- function (base_size = 12, base_family = "") {
           title = element_text(colour="black",size=14,angle=0,hjust=.5,vjust=.5,face="bold"))
 }
 
-# importar banco CVLI e Estrupos 2013-2017
+# importar bancos Violencia
 cvli_data <- read_excel("Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx")
 est_data <- read_excel("Violencia/dados/Rel - 1023 - ESTUPRO - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx")
 
@@ -49,7 +49,7 @@ shp_recife <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
 RPAbairroRecife <- read_csv("Demografia/resultados/RPAbairroRecife.csv")
 
 # padronizar nomes
-RPAbairroRecife$bairro <- toupper(RPAbairroRecife$bairro)%>%
+RPAbairroRecife$BAIRRO <- toupper(RPAbairroRecife$bairro)%>%
   stri_trans_general("Latin-ASCII")
 
 #======== Manipular Bases de Jovens =======#
@@ -72,7 +72,7 @@ func.maniA <- function(data){
     data$BAIRRO[data$BAIRRO == "DO RECIFE"] = "RECIFE"
     data$BAIRRO[data$BAIRRO == "PAU FERRO"] = "PAU-FERRO"
     # merir com RPAs
-    
+    data <- merge(data, RPAbairroRecife, by = "BAIRRO")
     # criar var jovem
     data$IDADE <- as.numeric(data$IDADE)
     data <- data[!is.na(data$IDADE),]
@@ -146,42 +146,7 @@ func.ano <- function(dataJovem, nome){
 func.ano(cvli_mani, "CVLI")
 func.ano(est_mani, "Estupros")
 
-#===== Mes =====#
-
-func.mes <- function(varMes, varAno, nome){
-  # ordernar meses e anos
-  if (nome == "Estupros"){
-    varMes <- factor(varMes, levels = c("JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"))
-  }
-  else {
-  varMes <- factor(varMes, levels = c("JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"))
-  }
-  # ordenar anos
-  varAno <- factor(varAno, levels = c("2013", "2014", "2015", "2016", "2017")) 
-  # juntar dados
-  dataMes <- data.frame(table(varMes, varAno))
-  # variavel MES/ANO
-  dataMes$date <-  with(dataMes, paste0(varMes, "/", varAno))
-  dataMes$date <- factor(dataMes$date, levels = dataMes$date)
-  #**Retirar Dezembro**
-  dataMes <- dataMes[dataMes$date != "DEZ/2017" & dataMes$date != "DEZEMBRO/2017",]
-  # grafico
-  ggplot(data = dataMes, aes(x = date, y = Freq, group = 1)) +
-    geom_line(color = "#7f0000") +
-    stat_smooth(method = lm, color= "#E69F00", se = F)+
-    labs(x = "", y= paste("Casos de", nome))+
-    tema_massa()%+replace% 
-    theme(axis.text.x = element_text(size=10,angle = 60, hjust=.5,vjust=.5,face="plain")) +
-    ggsave(paste0(nome, "_jovensMes.png"), path = "Violencia/resultados", width = 8, height = 4, units = "in")
-}
-
-# executar funcao
-func.mes(cvli_mani$MÊS, cvli_mani$ANO, "CVLI")
-func.mes(est_mani$MÊS, est_mani$ANO, "Estupros")
-
-#=========================================#
-# ANO / SEXO 
-#=========================================#
+#======= ANO / SEXO =======#
 
 func.anoSexo <- function(dataJovem, nome){
   # contagem 
@@ -203,6 +168,39 @@ func.anoSexo <- function(dataJovem, nome){
 
 func.anoSexo(cvli_jovem, "CVLI")
 func.anoSexo(est_jovem, "Estupros")
+
+#===== Mes =====#
+
+func.mes <- function(varMes, varAno, nome){
+  # ordernar meses e anos
+  if (nome == "Estupros"){
+    varMes <- factor(varMes, levels = c("JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"))
+  }
+  else {
+    varMes <- factor(varMes, levels = c("JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"))
+  }
+  # ordenar anos
+  varAno <- factor(varAno, levels = c("2013", "2014", "2015", "2016", "2017")) 
+  # juntar dados
+  dataMes <- data.frame(table(varMes, varAno))
+  # variavel MES/ANO
+  dataMes$date <-  with(dataMes, paste0(varMes, "/", varAno))
+  dataMes$date <- factor(dataMes$date, levels = dataMes$date)
+  #**Retirar Dezembro**
+  dataMes <- dataMes[dataMes$date != "DEZ/2017" & dataMes$date != "DEZEMBRO/2017",]
+  # grafico
+  ggplot(data = dataMes, aes(x = date, y = Freq, group = 1)) +
+    geom_line(color = "#7f0000") +
+    stat_smooth(method = lm, color= "#E69F00", se = F)+
+    labs(x = "", y= paste("Casos de", nome))+
+    tema_massa()%+replace% 
+    theme(axis.text.x = element_text(size=10,angle = 60, hjust=.5,vjust=.5,face="plain")) +
+    ggsave(paste0(nome, "_jovensMes.png"), path = "Violencia/resultados", width = 8, height = 4, units = "in")
+}
+
+# executar funcao func.mes
+func.mes(cvli_mani$MÊS, cvli_mani$ANO, "CVLI")
+func.mes(est_mani$MÊS, est_mani$ANO, "Estupros")
 
 #=====================#
 # RACA / SEXO
@@ -235,7 +233,6 @@ func.racaSexo <- function(data, info){
 # executar func.racaSexo
 func.racaSexo(cvli_jovem, "CVLI")
 func.racaSexo(est_jovem, "Estupros")
-
 
 #=========================================#
 # ANALISES DOS BAIRROS 
@@ -331,12 +328,12 @@ func.maniB <- function(data){
         # criar total de cvli por bairro
         data_bairro <- mutate(data_bairro, total_cvli = `0` + `1`)
         # renomear colunas
-        if (length(data) == 12){
+        if (length(data) == 14){
           colnames(data_bairro) <- c("BAIRRO", "cvli_nao_jovem", "cvli_jovem", "cvli_total")
         }     else{
           colnames(data_bairro) <- c("BAIRRO", "est_nao_jovem", "est_jovem", "est_total")
           }
-        # mergir co cvli_bairro_jovem
+        # mergir com cvli_bairro_jovem
         dataDem$BAIRRO <- toupper(dataDem$localidade)%>%
                           stri_trans_general("Latin-ASCII")
         data_bairro$BAIRRO <- best_match(as.character(data_bairro$BAIRRO), dataDem$BAIRRO)
@@ -357,7 +354,7 @@ est_bairro <- func.maniB(est_mani)
 func.quadroA <- function(data, varJovem, info){
   library(ggpubr)
   # prop de jovens por 1000 jovens e arredondar
-  data <- mutate(data, prop_pop_1000 =  ((varJovem / data$pop_jovem)*1000)/5)
+  data <- mutate(data, prop_pop_1000 =  (( varJovem / data$pop_jovem)*1000)/5)
   data$prop_pop_1000 <- round(data$prop_pop_1000, 2)
   # ordenar
   data$localidade <- factor(data$localidade, levels = data$localidade[order(data$prop_pop_1000)])
@@ -475,6 +472,29 @@ est_map_2015 <- mapa.funcao(shp_recife, cvli_bairro[cvli_bairro$Ano == 2015,], c
 ggarrange(est_map_2013, est_map_2014, est_map_2015, est_map_2016, est_map_2017, ncol = 3, nrow = 2, common.legend = T, legend = "bottom")
 ggsave("Violencia/resultados/CVLI_ano_mapa.png", width = 16, height = 9, units = "in")
 
+#===============================#
+#             RPAs
+#===============================#
+
+#======= ANO / RPA =======#
+
+func.anoRPA <- function(JovemBairro, nome){
+  # contagem 
+  jovemAnoRPA <- data.frame(table(JovemBairro$ANO, JovemBairro$RPA))
+  # grafico
+  ggplot(data = jovemAnoRPA) +
+    geom_line(aes(x = Var1, y = Freq, group = Var2, color = Var2, linetype = Var2), size = 1) + 
+    geom_label_repel(aes(x = Var1, y = Freq, label = Freq))+
+    labs(x = "", y = paste("Casos", nome) )+
+    scale_linetype_manual("", values = c(1, 2, 3, 4, 5, 6)) +
+    scale_color_manual("", values=c("#020001", "#3e060d","#6f1e08", "#e05102","#fad703", "#7f0000"))+
+    tema_massa()%+replace%
+    theme(legend.position="bottom")+
+    ggsave(paste0(nome, "_por_AnoRPA.png"), path = "Violencia/resultados",width = 12, height = 7, units = "in")
+}
+
+func.anoRPA(cvli_jovem, "CVLI")
+func.anoRPA(est_jovem, "Estupros")
 
 #==================================================================#
 # CVLI por LOGRADOURO [EXECUTAR EM MAQUINA COM BOM PROCESSAMENTO] 

@@ -94,10 +94,10 @@ write.csv(demojovem_2010, file = "Demografia/resultados/demo_jovem_2010.csv")
 
 # Bairros para cada RPA
 rpa1 <- c("; Recife; Santo Amaro; Boa Vista; Cabanga; Ilha do Leite; Paissandu; Santo Antônio; São José; Coelhos; Soledade; Ilha Joana Bezerra;")
-rpa2 <- c("; Arruda; Campina do Barreto; Encruzilhada; Hipódromo; Peixinhos; Ponto de Parada; Rosarinho; Torreão; Água Fria; Alto Santa Terezinha; Bomba do Hemetério; Cajueiro; Fundão; Porto da Madeira; Beberibe; Dois Unidos; Linha do Tiro;")
-rpa3 <- c("; Aflitos; Alto do Mandu; Alto José Bonifácio; Alto José do Pinho; Apipucos; Brejo da Guabiraba; Brejo de Beberibe; Casa Amarela; Casa Forte; Córrego do Jenipapo; Derby; Dois Irmãos; Espinheiro; Graças; Guabiraba; Jaqueira; Macaxeira; Monteiro; Nova Descoberta; Parnamirim; Passarinho; Pau-Ferro; Poço da Panela, Santana; S?tio dos Pintos; Tamarineira; Mangabeira; Morro da Conceição; Vasco da Gama;")
+rpa2 <- c("; Arruda; Campina do Barreto; Encruzilhada; Hipódromo; Peixinhos; Ponto de Parada; Rosarinho; Torreão; Água Fria; Alto Santa Terezinha; Bomba do Hemetério; Cajueiro; Fundão; Porto da Madeira; Beberibe; Dois Unidos; Linha do Tiro; Campo Grande;")
+rpa3 <- c("; Aflitos; Alto do Mandu; Alto José Bonifácio; Alto José do Pinho; Apipucos; Brejo da Guabiraba; Brejo de Beberibe; Casa Amarela; Casa Forte; Córrego do Jenipapo; Derby; Dois Irmãos; Espinheiro; Graças; Guabiraba; Jaqueira; Macaxeira; Monteiro; Nova Descoberta; Parnamirim; Passarinho; Pau-Ferro; Poço da Panela; Santana; Sitio dos Pintos; Tamarineira; Mangabeira; Morro da Conceição; Vasco da Gama;")
 rpa4 <- c("; Cordeiro; Ilha do Retiro; Iputinga; Madalena; Prado; Torre; Zumbi; Engenho do Meio; Torrões; Caxangá; Cidade Universitária; Várzea;")
-rpa5 <- c("; Afogados; Areias; Barro; Bongi; Caçote; Coqueiral; Curado; Estância; Jardim São Paulo; Jiquiá; Mangueira; Mustardinha; San Martin; Sancho; Tejipió; Tot?;")
+rpa5 <- c("; Afogados; Areias; Barro; Bongi; Caçote; Coqueiral; Curado; Estância; Jardim São Paulo; Jiquiá; Mangueira; Mustardinha; San Martin; Sancho; Tejipió; Totó;")
 rpa6 <- c("; Boa Viagem; Brasília Teimosa; Imbiribeira; Ipsep; Pina; Ibura; Jordão; Cohab;")
 
 # funcao para manipular string
@@ -112,6 +112,13 @@ rpa3 <- func.mani1(rpa3)
 rpa4 <- func.mani1(rpa4)
 rpa5 <- func.mani1(rpa5)
 rpa6 <- func.mani1(rpa6)
+
+# combinar rpas em data.frame e salvar
+dataRPA <- data.frame(bairro = c(rpa1, rpa2, rpa3, rpa4, rpa5, rpa6), 
+                      RPA = c(rep("RPA1",length(rpa1)),rep("RPA2",length(rpa2)),rep("RPA3",length(rpa3)),
+                              rep("RPA4",length(rpa4)),rep("RPA5",length(rpa5)),rep("RPA6",length(rpa6))
+                      ))
+write.csv(dataRPA, "Demografia/resultados/RPAbairroRecife.csv" ,row.names = F)
 
 # Function to return RPA information
 func.rpa <- function(data, rpa, Ano, localidade){
