@@ -58,7 +58,7 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
     string_vector[s] = string_replacement
     return(string_vector)
   }
-  
+  # manipulate string for merge
   data$EBAIRRNOME = data$localidade
   data$EBAIRRNOME = toupper(data$EBAIRRNOME)
   data$EBAIRRNOME = stri_trans_general(data$EBAIRRNOME , "Latin-ASCII")
@@ -74,7 +74,6 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
   shp_data$bairros_detasq = 1
  # shp_data$bairros_detasq[1:4] = ""
   shp_data$bairros_detasq[c(length(shp_data)-4):c(length(shp_data))] = ""
-  
   shp_data$bairros_detasq = with(shp_data, paste0(shp_data$bairros_detasq, shp_data$EBAIRRNOME))
   shp_data$bairros_detasq_cod = grepl(shp_data$bairros_detasq, pattern = "1")
   shp_data$bairros_detasq[shp_data$bairros_detasq_cod == TRUE ] = ""
@@ -82,11 +81,9 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
   # tranformar shapefile em polygonsdataframe
   data_fortity = fortify(shp_data, region = "EBAIRRNOME")
   localidade = shp_data@data$EBAIRRNOME
-  
   # extrair centroides dos poligonos
   centroids.df = as.data.frame(coordinates(shp_data))
   names(centroids.df) = c("Longitude", "Latitude")  #more sensible column localidades
-  
   # base para plotagem
   variavel = shp_data@data$variavel
   nomes_centroides = shp_data$bairros_detasq
@@ -109,6 +106,11 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
 
     return(plot)
 }
+
+
+x <- data.frame(sapply(data_bairro_out, function(x) str_replace(x, "NA", "0")%>%
+                         as.numeric(as.character(x))
+                                    ))
 
 
 
