@@ -19,7 +19,7 @@
 # install.packages(c("readxl", "stringr", "dplyr", "ggplot2", "geojsonio"))
 
 # carregar pacotes
-pacotes <- c("readr","readxl", "stringr", "dplyr", "ggplot2", "viridis", "maps", "raster", "ggmap", "ggrepel", "sp", "maptools")
+pacotes <- c("qdap","readr","readxl", "stringr", "dplyr", "ggplot2", "viridis", "maps", "raster", "ggmap", "ggrepel", "sp", "maptools")
 lapply(pacotes, library, character.only = T)
 
 # Tema para Graficos
@@ -74,6 +74,38 @@ est_jovem <- data.frame(est_mani[2])
 # selecionar todos os casos
 cvli_mani <- data.frame(cvli_mani[1])
 est_mani <- data.frame(est_mani[1])
+
+#======= Manipular RPA ========#
+
+# Bairros para cada RPA
+rpa1 <- c("; Recife; Santo Amaro; Boa Vista; Cabanga; Ilha do Leite; Paissandu; Santo Antônio; São José; Coelhos; Soledade; Ilha Joana Bezerra;")
+rpa2 <- c("; Arruda; Campina do Barreto; Encruzilhada; Hipódromo; Peixinhos; Ponto de Parada; Rosarinho; Torreão; Água Fria; Alto Santa Terezinha; Bomba do Hemetério; Cajueiro; Fundão; Porto da Madeira; Beberibe; Dois Unidos; Linha do Tiro;")
+rpa3 <- c("; Aflitos; Alto do Mandu; Alto José Bonifácio; Alto José do Pinho; Apipucos; Brejo da Guabiraba; Brejo de Beberibe; Casa Amarela; Casa Forte; Córrego do Jenipapo; Derby; Dois Irmãos; Espinheiro; Graças; Guabiraba; Jaqueira; Macaxeira; Monteiro; Nova Descoberta; Parnamirim; Passarinho; Pau-Ferro; Poço da Panela, Santana; SÍtio dos Pintos; Tamarineira; Mangabeira; Morro da Conceição; Vasco da Gama;")
+rpa4 <- c("; Cordeiro; Ilha do Retiro; Iputinga; Madalena; Prado; Torre; Zumbi; Engenho do Meio; Torrões; Caxangá; Cidade Universitária; Várzea;")
+rpa5 <- c("; Afogados; Areias; Barro; Bongi; Caçote; Coqueiral; Curado; Estância; Jardim São Paulo; Jiquiá; Mangueira; Mustardinha; San Martin; Sancho; Tejipió; Totó;")
+rpa6 <- c("; Boa Viagem; Brasília Teimosa; Imbiribeira; Ipsep; Pina; Ibura; Jordão; Cohab;")
+
+# combinar em lista
+listaBairros <- list(rpa1, rpa2, rpa3, rpa4, rpa5, rpa6)
+
+# funcao p manipular bairros
+func.mani1 <- function(x){ 
+  x = as.vector(genXtract(x, ";", ";")) # select words between ';' and transform result in vector
+  x = substring(x, 2)  # remove blank space in the beggining on the words
+  return(x) 
+}
+
+rpa1 <- func.mani1(rpa1)
+rpa2 <- func.mani1(rpa2)
+rpa3 <- func.mani1(rpa3)
+rpa4 <- func.mani1(rpa4)
+rpa5 <- func.mani1(rpa5)
+rpa6 <- func.mani1(rpa6)
+
+dataRPA <- data.frame(bairro = c(rpa1, rpa2, rpa3, rpa4, rpa5, rpa6), 
+           RPA = c(rep("rpa1",length(rpa1)),rep("rpa2",length(rpa2)),rep("rpa3",length(rpa3)),
+                   rep("rpa4",length(rpa4)),rep("rpa5",length(rpa5)),rep("rpa6",length(rpa6))
+                   ))
 
 #===========================#
 # ANALISE FAIXA ETARIA
