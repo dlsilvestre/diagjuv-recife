@@ -440,24 +440,48 @@ func.quadroC(est_bairro, est_bairro$est_jovem, est_bairro$est_total, "Estupros")
 # MAPAS POR ANO [EM CONSTRUCAO]
 #=======================================#
 
-func.mapaAno <- function(data, varAno, varJovem, info){
+mapas = list()
+func.mapaAno <- function(data, info){
   ## MANIPULAR BAIRRO/ANO ##
-  
-  anos = c(2013:2017)
-  for (i in anos){
-    data = data[varAno == i,]
-    varJovem = varJovem[varAno == i]
-    mapa <- mapa.funcao(shp_recife, data, varJovem, paste(i) , legendtitle = paste(info, "de Jovens") , pallete = "A")
-    mapas = list(mapas, mapa)
+  dataBairroAno = data.frame(table(data$BAIRRO, data$ANO))
+  anos = as.character(c(2013:2017))
+  plots = c(1:5)
+  for (i in anos)
+    local({
+      i = i
+    for (j in plots)
+      local({
+        j = j 
+    dataAno = dataBairroAno[dataBairroAno$Var2 == i,]
+    dataAno$localidade = dataAno$Var1
+    mapa = mapa.funcao(shp_recife, dataAno, dataAno$Freq, paste(i) , legendtitle = paste(info, "de Jovens") , pallete = "A")
+    mapas[[j]] = mapa
     
-    ggarrange(est_map_2013, est_map_2014, est_map_2015, est_map_2016, est_map_2017, ncol = 3, nrow = 2, common.legend = T, legend = "bottom")
-    ggsave("Violencia/resultados/CVLI_ano_mapa.png", width = 16, height = 9, units = "in")
-  }
+    quadroAno = ggarrange(mapas[1], mapas[2], mapas[3], mapas[4], mapas[5], ncol = 3, nrow = 2, common.legend = T, legend = "bottom")
+    return(quadroAno)
+    ggsave("Violencia/resultados/anomapatest.png", width = 16, height = 9, units = "in")
+    })
+  })
 }
 
+func.mapaAno(cvli_jovem, "CVLI")
+
+# TESTE 2
+dataBairroAno = data.frame(table(cvli_jovem$BAIRRO, cvli_jovem$ANO))
+dataBairroAno$localidade = dataBairroAno$Freq
+
+anos = as.character(c(2013:2017))
+listaMap = list()
+cont = 0
 for (i in anos){
-  print(i)
+  dataAno = dataBairroAno[dataBairroAno$Var2 == i,]
+  mapa = mapa.funcao(shp_recife, dataAno, dataAno$Freq, paste(i) , legendtitle = "CVLI de Jovens", pallete = "A")
+  listaMap[[cont]] = mapa
+  cont = cont + 1
 }
+listaMap[2]
+
+
 
 #---- 2013 ----#
 est_map_2013 <- mapa.funcao(shp_recife, cvli_bairro[cvli_bairro$Ano == 2013,], cvli_bairro$cvli_jovem[cvli_bairro$Ano == 2013], 
