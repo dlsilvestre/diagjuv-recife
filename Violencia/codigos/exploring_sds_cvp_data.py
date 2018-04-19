@@ -34,6 +34,45 @@ logradourosCVP.columns = ['Lograoduro', 'CasosCVP']
 bairrosCVP.to_csv("bairrosCVP.csv", sep=';', encoding='utf-8')
 logradourosCVP.to_csv("logradourosCVP.csv", sep=';', encoding='utf-8')
 
+# importar arquivo xls
+workbookCVM = pd.ExcelFile('/home/pacha/Desktop/bases_sds_prefeitura/1.1.5 - Crimes Violentos Contra a Mulher (CVM)/SEC. MULHER - 2015.xlsx')
+dataCVM = workbookCVM.parse(0)
+
+# selecionar primeira linha do banco
+NomesColunas = dataCVM.loc[[0]].values.flatten().tolist()
+
+# onde ' ' substituir por '_'
+#listaNew = []
+#for nome in NomesColunas:
+#    for letra in nome:
+#        if letra == ' ':
+#            nome.remove(letra)
+# print(listaNew)
+
+#NomesColunas2 = [NomesColunas.replace(' ', '_') for nome in NomesColunas]
+
+# renomear colunas
+dataCVM.columns = NomesColunas
+
+# remover primeira linha do banco
+dataCVM = dataCVM.drop(dataCVM.index[[0]])
+
+# contagem de casos por bairro e LOGRADOURO
+#bairrosCVM = dataCVM.bairro do fato.value_counts()
+#logradourosCVM = dataCVM.LOGRADOURO.value_counts()
+
+'''
+Criar uma funcao:
+
+listaCont = [] # lista para inserir contagem de cada coluna
+for coluna in base:
+    colunaCont = coluna.value.count()  # contagem
+    colunaCont = colunaCont.reset_index()       # reset index
+    bairrosCVP.columns = ['Bairro', 'CasosCVP'] # renomear colunas
+    salvar coluna em formato .csv      # ou criar uma base com essas infos e salvar
+
+'''
+
 '''
 [EM DESENVOLVIMENTO]
 

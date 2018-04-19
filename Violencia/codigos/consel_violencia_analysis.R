@@ -33,8 +33,8 @@ tema_massa <- function (base_size = 12, base_family = "") {
 }
 
 # importar bancos Violencia
-cvli_data <- read_excel("Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx")
-est_data <- read_excel("Violencia/dados/Rel - 1023 - ESTUPRO - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx")
+cvli_data <- read_excel("Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro, gÃªnero, cor da pele, idade, m?s - RECIFE - Jan2013 a Nov2017.xlsx")
+est_data <- read_excel("Violencia/dados/Rel - 1023 - ESTUPRO - logradouros, bairro, genero, cor da pele, idade, m?s - RECIFE - Jan2013 a Nov2017.xlsx")
 
 # carregar shapefile 1 (completo)
 shp_recife <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
@@ -103,7 +103,7 @@ func.faixa <- function(data, var, nome){
     geom_bar(aes(x = var), fill = "#333333")+
     geom_vline(xintercept = 15, size = 1, colour = "#FF3721", linetype = "dashed")+
     geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
-    labs(x = "Idade", y = paste("Frequência de", nome))+
+    labs(x = "Idade", y = paste("Frequ?ncia de", nome))+
     scale_x_continuous(breaks = pretty(var, n = 25)) +
     tema_massa()+
     ggsave(paste0(nome, "_por_idade.png"), path = "Violencia/resultados",width = 9, height = 6, units = "in")
@@ -113,7 +113,7 @@ func.faixa <- function(data, var, nome){
   pct = mutate(pct, jovens = ifelse(var >=15 & var <= 29, 1, 0))
   pct = aggregate(pct$Freq, by = list(Category = pct$jovens), FUN=sum)
   pct = c(pct[2,2] /  sum(pct[1,2] + pct[2,2] ))*100
-  pasteA = paste0(round(pct, 2),"% dos casos de ", nome, " são de jovens" ) 
+  pasteA = paste0(round(pct, 2),"% dos casos de ", nome, " sÃ£o de jovens" ) 
   return(list(ret_plot, pasteA))
 }
 
@@ -130,7 +130,7 @@ func.ano <- function(dataJovem, nome){
   # contagem 
   jovemAno <- data.frame(table(dataJovem$ANO, dataJovem$jovem))
   # fator
-  jovemAno$jovem <- factor(jovemAno$Var2, levels = c("0", "1"), labels = c("Não-jovem", "Jovem"))
+  jovemAno$jovem <- factor(jovemAno$Var2, levels = c("0", "1"), labels = c("N?o-jovem", "Jovem"))
   # grafico
   ggplot(data = jovemAno) +
     geom_line(aes(x = Var1, y = Freq, group = jovem, color = jovem, linetype = jovem), size = 1) + 
@@ -174,7 +174,7 @@ func.anoSexo(est_jovem, "Estupros")
 func.mes <- function(varMes, varAno, nome){
   # ordernar meses e anos
   if (nome == "Estupros"){
-    varMes <- factor(varMes, levels = c("JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"))
+    varMes <- factor(varMes, levels = c("JANEIRO", "FEVEREIRO", "MAR?O", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"))
   }
   else {
     varMes <- factor(varMes, levels = c("JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"))
@@ -199,8 +199,8 @@ func.mes <- function(varMes, varAno, nome){
 }
 
 # executar funcao func.mes
-func.mes(cvli_mani$MÊS, cvli_mani$ANO, "CVLI")
-func.mes(est_mani$MÊS, est_mani$ANO, "Estupros")
+func.mes(cvli_mani$M?S, cvli_mani$ANO, "CVLI")
+func.mes(est_mani$M?S, est_mani$ANO, "Estupros")
 
 #=====================#
 # RACA / SEXO
@@ -211,7 +211,7 @@ func.racaSexo <- function(data, info){
   raca_sex <- data.frame(table(data$COR.DA.PELE, data$SEXO))
   # manipulacao
   raca_sex$Var1 <- as.character(raca_sex$Var1)
-  raca_sex$Var1[raca_sex$Var1 == "NAO INFORMADO"] <- "Não Informada"
+  raca_sex$Var1[raca_sex$Var1 == "NAO INFORMADO"] <- "N?o Informada"
   raca_sex <- raca_sex[raca_sex$Var2 != "DESCONHECIDO",]
   # proporcao
   raca_sex <- mutate(raca_sex, prop = round((Freq / sum(Freq)),3)*100)
