@@ -24,7 +24,7 @@ import pandas as pd
 workbookCVM = pd.ExcelFile('/home/pacha/Desktop/bases_sds_prefeitura/1.1.5 - Crimes Violentos Contra a Mulher (CVM)/SEC. MULHER - 2015.xlsx')
 dataCVM = workbookCVM.parse(0)
 
-# selecionar primeira linha do banco
+# selecionar primeira linha do bancoN
 NomesColunas = dataCVM.loc[[0]].values.flatten().tolist()
 
 # onde ' ' substituir por '_'
@@ -35,14 +35,17 @@ NomesColunas = dataCVM.loc[[0]].values.flatten().tolist()
 #            nome.remove(letra)
 # print(listaNew)
 
-def transMin(texto):
-	textoFinal = ""
-	for letra in texto:
-		if ord(letra) >= ord("A") and ord(letra) <= ord("Z"):
-			textoFinal += chr(ord(letra) + 32)
-		else:
-			textoFinal += letra
-return textoFinal
+def transEspacoUnderline(listaTxt):
+	listaFinal = []
+	for nome in listaTxt:
+		for letra in texto:
+			textoTrans = ""
+			if letra == ' ':
+				textoTrans += '_'
+			else:
+				textoTrans += letra
+			listaFinal.append(textoTrans)
+	return listaFinal
 
 #NomesColunas2 = [NomesColunas.replace(' ', '_') for nome in NomesColunas]
 
