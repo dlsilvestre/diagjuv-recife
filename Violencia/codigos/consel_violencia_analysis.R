@@ -33,8 +33,8 @@ tema_massa <- function (base_size = 12, base_family = "") {
 }
 
 # importar bancos Violencia
-cvli_data <- read_excel("Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro, gÃªnero, cor da pele, idade, m?s - RECIFE - Jan2013 a Nov2017.xlsx")
-est_data <- read_excel("Violencia/dados/Rel - 1023 - ESTUPRO - logradouros, bairro, genero, cor da pele, idade, m?s - RECIFE - Jan2013 a Nov2017.xlsx")
+cvli_data <- read_excel("Violencia/dados/Rel - 1015 - CVLI - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx")
+est_data <- read_excel("Violencia/dados/Rel - 1023 - ESTUPRO - logradouros, bairro, gênero, cor da pele, idade, mês - RECIFE - Jan2013 a Nov2017.xlsx")
 
 # carregar shapefile 1 (completo)
 shp_recife <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
@@ -49,6 +49,7 @@ shp_recife <- shapefile("Dados Gerais/bases_cartograficas/Bairros.shp")
 RPAbairroRecife <- read_csv("Demografia/resultados/RPAbairroRecife.csv")
 
 # padronizar nomes
+library(stringi)
 RPAbairroRecife$BAIRRO <- toupper(RPAbairroRecife$bairro)%>%
   stri_trans_general("Latin-ASCII")
 
@@ -103,7 +104,7 @@ func.faixa <- function(data, var, nome){
     geom_bar(aes(x = var), fill = "#333333")+
     geom_vline(xintercept = 15, size = 1, colour = "#FF3721", linetype = "dashed")+
     geom_vline(xintercept = 29, size = 1, colour = "#FF3721", linetype = "dashed")+
-    labs(x = "Idade", y = paste("Frequ?ncia de", nome))+
+    labs(x = "Idade", y = paste("Frequência de", nome))+
     scale_x_continuous(breaks = pretty(var, n = 25)) +
     tema_massa()+
     ggsave(paste0(nome, "_por_idade.png"), path = "Violencia/resultados",width = 9, height = 6, units = "in")
@@ -113,7 +114,7 @@ func.faixa <- function(data, var, nome){
   pct = mutate(pct, jovens = ifelse(var >=15 & var <= 29, 1, 0))
   pct = aggregate(pct$Freq, by = list(Category = pct$jovens), FUN=sum)
   pct = c(pct[2,2] /  sum(pct[1,2] + pct[2,2] ))*100
-  pasteA = paste0(round(pct, 2),"% dos casos de ", nome, " sÃ£o de jovens" ) 
+  pasteA = paste0(round(pct, 2),"% dos casos de ", nome, " são de jovens" ) 
   return(list(ret_plot, pasteA))
 }
 

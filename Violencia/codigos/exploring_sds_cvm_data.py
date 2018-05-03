@@ -35,25 +35,40 @@ NomesColunas = dataCVM.loc[[0]].values.flatten().tolist()
 #            nome.remove(letra)
 # print(listaNew)
 
+# funcao para substituir 'espaco' por '_'
 def transEspacoUnderline(listaTxt):
 	listaFinal = []
 	for nome in listaTxt:
-		for letra in texto:
-			textoTrans = ""
+		textoTrans = ''
+		for letra in nome:
 			if letra == ' ':
 				textoTrans += '_'
 			else:
 				textoTrans += letra
-			listaFinal.append(textoTrans)
+		listaFinal.append(textoTrans)
 	return listaFinal
 
-#NomesColunas2 = [NomesColunas.replace(' ', '_') for nome in NomesColunas]
+# executar funcao
+dataCVM.columns = transEspacoUnderline(NomesColunas)
 
 # renomear colunas
 dataCVM.columns = NomesColunas
 
 # remover primeira linha do banco
 dataCVM = dataCVM.drop(dataCVM.index[[0]])
+
+# visualizar dimensoes da base
+dataCVM.shape
+
+# selecionar amostra da base
+dataCVM_sample = dataCVM.sample(n = 10000, replace="False")
+
+# exportar base
+dataCVM_sample.to_csv("dataCVM_sample10000.csv", sep=';', encoding='utf-8')
+
+# visualizar diretorio de trabalho
+import os
+cwd = os.getcwd()
 
 # contagem de casos por bairro e LOGRADOURO
 #bairrosCVM = dataCVM.bairro do fato.value_counts()
@@ -64,13 +79,11 @@ Criar uma funcao:
 
 listaCont = [] # lista para inserir contagem de cada coluna
 for coluna in base:
-    colunaCont = coluna.value.count()  # contagem
+    colunaCont = coluna.value.count()  			# contagem
     colunaCont = colunaCont.reset_index()       # reset index
     bairrosCVP.columns = ['Bairro', 'CasosCVP'] # renomear colunas
-    salvar coluna em formato .csv      # ou criar uma base com essas infos e salvar
-
+    salvar coluna em formato .csv   		    # ou criar uma base com essas infos e salvar
 '''
-
 
 '''
 #  definir index como coluna
