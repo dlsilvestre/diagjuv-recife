@@ -75,7 +75,6 @@ naturezaCountCVM.columns = ['natura_do_ocorrido','contagem']
 # exportar
 naturezaCountCVM.to_csv("naturezaCountCVM.csv", sep=';', encoding='utf-8')
 
-
 #logradourosCVM = dataCVM.LOGRADOURO.value_counts()
 
 '''
