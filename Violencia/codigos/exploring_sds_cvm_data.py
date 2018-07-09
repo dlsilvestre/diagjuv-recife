@@ -27,14 +27,6 @@ dataCVM = workbookCVM.parse(0)
 # selecionar primeira linha do bancoN
 NomesColunas = dataCVM.loc[[0]].values.flatten().tolist()
 
-# onde ' ' substituir por '_'
-#listaNew = []
-#for nome in NomesColunas:
-#    for letra in nome:
-#        if letra == ' ':
-#            nome.remove(letra)
-# print(listaNew)
-
 # funcao para substituir 'espaco' por '_'
 def transEspacoUnderline(listaTxt):
 	listaFinal = []
@@ -51,11 +43,8 @@ def transEspacoUnderline(listaTxt):
 # executar funcao
 dataCVM.columns = transEspacoUnderline(NomesColunas)
 
-# renomear colunas
-dataCVM.columns = NomesColunas
-
 # remover primeira linha do banco
-dataCVM = dataCVM.drop(dataCVM.index[[0]])
+dataCVM.drop(dataCVM.index[[0]])
 
 # visualizar dimensoes da base
 dataCVM.shape
@@ -70,8 +59,23 @@ dataCVM_sample.to_csv("dataCVM_sample10000.csv", sep=';', encoding='utf-8')
 import os
 cwd = os.getcwd()
 
-# contagem de casos por bairro e LOGRADOURO
-#bairrosCVM = dataCVM.bairro do fato.value_counts()
+#=============  Explorar Dados =============#
+
+# selecionar casos com base em valore de coluna
+policiaCVM = dataCVM.loc[dataCVM['profissão'] == 'POLICIAL CIVIL']
+
+# visualizar conteudo de celula
+policiaCVM.loc[280914,'complemento_do_bo_(narrativa)']
+
+# contagem de casos
+naturezaCountCVM = dataCVM.natureza.value_counts()
+naturezaCountCVM = naturezaCountCVM.reset_index()
+naturezaCountCVM.columns = ['natura_do_ocorrido','contagem']
+
+# exportar
+naturezaCountCVM.to_csv("naturezaCountCVM.csv", sep=';', encoding='utf-8')
+
+
 #logradourosCVM = dataCVM.LOGRADOURO.value_counts()
 
 '''

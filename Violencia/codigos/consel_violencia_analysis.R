@@ -131,7 +131,7 @@ func.ano <- function(dataJovem, nome){
   # contagem 
   jovemAno <- data.frame(table(dataJovem$ANO, dataJovem$jovem))
   # fator
-  jovemAno$jovem <- factor(jovemAno$Var2, levels = c("0", "1"), labels = c("N?o-jovem", "Jovem"))
+  jovemAno$jovem <- factor(jovemAno$Var2, levels = c("0", "1"), labels = c("Não-jovem", "Jovem"))
   # grafico
   ggplot(data = jovemAno) +
     geom_line(aes(x = Var1, y = Freq, group = jovem, color = jovem, linetype = jovem), size = 1) + 
@@ -290,9 +290,9 @@ mapa.funcao <- function(shape, data, variable, maintitle, legendtitle, pallete) 
     scale_fill_viridis(name = legendtitle, option= pallete, direction = -1) +
     # scale_fill_gradient(name = legendtitle, low="lightgreen", high= "darkblue")+
     geom_label_repel(aes(label = nomes_centroides, x = Longitude, y = Latitude), size = 4.5, color = "black") +
-    labs(title = maintitle)+
+    labs(title = maintitle, x = "Longitude", y = "Latitude")+
     coord_fixed(1) +
-    theme_nothing(legend = T)+
+  #  theme_nothing(legend = T)+
     theme(legend.position="bottom",
           legend.key.size = unit(0.7, "cm"),
           legend.text = element_text(size = 14, hjust = 3, vjust = 3),
@@ -391,8 +391,7 @@ func.quadroB <- function(data, varJovem, info){
     geom_col(fill = "#7f0000")+
     geom_text(aes(label = JovProp), hjust = -0.2, size = 4)+
     labs(x = "", y = paste("Porcent. de", info ,"de Jovens"))+
-    coord_flip()+
-    tema_massa()
+    coord_flip()
   # Mapa 
   jovPropMap <- mapa.funcao(shp_recife, data, data$JovProp, "" , legendtitle = paste("Porcent. de", info ,"de Jovens"), pallete = "A")
   # Combinar em quadro
